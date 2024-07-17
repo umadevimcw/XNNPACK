@@ -160,6 +160,9 @@ enum xnn_status xnn_define_multiply_v2(
   uint32_t output_id,
   uint32_t flags)
 {
+  int32_t output_min = INT_MIN;
+  int32_t output_max = INT_MAX;
+
   enum xnn_status status;
   if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_multiply)) != xnn_status_success) {
     return status;
@@ -167,6 +170,10 @@ enum xnn_status xnn_define_multiply_v2(
 
   if ((status = xnn_subgraph_check_nth_input_node_id(xnn_node_type_multiply, input1_id, subgraph->num_values, 1)) !=
       xnn_status_success) {
+    return status;
+  }
+
+  if (status =xnn_subgraph_check_output_min_max(xnn_node_type_divide, output_min, output_max) != xnn_status_success) {
     return status;
   }
 
@@ -239,6 +246,8 @@ enum xnn_status xnn_define_multiply_v2(
   }
 
   node->type = xnn_node_type_multiply;
+  node->activation.output_min = output_min;
+  node->activation.output_max = output_max;
   node->compute_type = compute_type;
   node->num_inputs = 2;
   node->inputs[0] = input1_id;
