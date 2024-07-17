@@ -15,7 +15,7 @@
 
 # x86 SSE41
 - name: xnn_s32_vmulc_minmax_ukernel__sse41_u4
-  init: xxnn_init_s32_minmax_scalar_params
+  init: xnn_init_s32_minmax_scalar_params
 - name: xnn_s32_vmulc_minmax_ukernel__sse41_u8
   init: xnn_init_s32_minmax_scalar_params
 - name: xnn_s32_vmulc_minmax_ukernel__sse41_u12

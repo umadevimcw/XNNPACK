@@ -233,7 +233,7 @@ TEST(S32_VMULC_MINMAX__SCALAR_U8, qmax) {
     TEST_REQUIRES_X86_SSE41;
     VBinaryCMicrokernelTester()
       .batch_size(4)
-      .Test(xnn_s32_vmulc_minmax_ukernel__sse41_u4, VBinaryCMicrokernelTester::OpType::MulC, xxnn_init_s32_minmax_scalar_params);
+      .Test(xnn_s32_vmulc_minmax_ukernel__sse41_u4, VBinaryCMicrokernelTester::OpType::MulC, xnn_init_s32_minmax_scalar_params);
   }
 
   TEST(S32_VMULC_MINMAX__SSE41_U4, batch_div_4) {
@@ -241,7 +241,7 @@ TEST(S32_VMULC_MINMAX__SCALAR_U8, qmax) {
     for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
       VBinaryCMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s32_vmulc_minmax_ukernel__sse41_u4, VBinaryCMicrokernelTester::OpType::MulC, xxnn_init_s32_minmax_scalar_params);
+        .Test(xnn_s32_vmulc_minmax_ukernel__sse41_u4, VBinaryCMicrokernelTester::OpType::MulC, xnn_init_s32_minmax_scalar_params);
     }
   }
 
@@ -250,7 +250,7 @@ TEST(S32_VMULC_MINMAX__SCALAR_U8, qmax) {
     for (size_t batch_size = 1; batch_size < 4; batch_size++) {
       VBinaryCMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s32_vmulc_minmax_ukernel__sse41_u4, VBinaryCMicrokernelTester::OpType::MulC, xxnn_init_s32_minmax_scalar_params);
+        .Test(xnn_s32_vmulc_minmax_ukernel__sse41_u4, VBinaryCMicrokernelTester::OpType::MulC, xnn_init_s32_minmax_scalar_params);
     }
   }
 
@@ -259,7 +259,7 @@ TEST(S32_VMULC_MINMAX__SCALAR_U8, qmax) {
     for (size_t batch_size = 5; batch_size < 8; batch_size++) {
       VBinaryCMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s32_vmulc_minmax_ukernel__sse41_u4, VBinaryCMicrokernelTester::OpType::MulC, xxnn_init_s32_minmax_scalar_params);
+        .Test(xnn_s32_vmulc_minmax_ukernel__sse41_u4, VBinaryCMicrokernelTester::OpType::MulC, xnn_init_s32_minmax_scalar_params);
     }
   }
 
@@ -269,7 +269,7 @@ TEST(S32_VMULC_MINMAX__SCALAR_U8, qmax) {
       VBinaryCMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_s32_vmulc_minmax_ukernel__sse41_u4, VBinaryCMicrokernelTester::OpType::MulC, xxnn_init_s32_minmax_scalar_params);
+        .Test(xnn_s32_vmulc_minmax_ukernel__sse41_u4, VBinaryCMicrokernelTester::OpType::MulC, xnn_init_s32_minmax_scalar_params);
     }
   }
 
@@ -279,7 +279,7 @@ TEST(S32_VMULC_MINMAX__SCALAR_U8, qmax) {
       VBinaryCMicrokernelTester()
         .batch_size(batch_size)
         .qmin(128)
-        .Test(xnn_s32_vmulc_minmax_ukernel__sse41_u4, VBinaryCMicrokernelTester::OpType::MulC, xxnn_init_s32_minmax_scalar_params);
+        .Test(xnn_s32_vmulc_minmax_ukernel__sse41_u4, VBinaryCMicrokernelTester::OpType::MulC, xnn_init_s32_minmax_scalar_params);
     }
   }
 
@@ -289,7 +289,7 @@ TEST(S32_VMULC_MINMAX__SCALAR_U8, qmax) {
       VBinaryCMicrokernelTester()
         .batch_size(batch_size)
         .qmax(128)
-        .Test(xnn_s32_vmulc_minmax_ukernel__sse41_u4, VBinaryCMicrokernelTester::OpType::MulC, xxnn_init_s32_minmax_scalar_params);
+        .Test(xnn_s32_vmulc_minmax_ukernel__sse41_u4, VBinaryCMicrokernelTester::OpType::MulC, xnn_init_s32_minmax_scalar_params);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
