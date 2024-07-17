@@ -173,7 +173,7 @@ enum xnn_status xnn_define_multiply_v2(
     return status;
   }
 
-  if ((status =xnn_subgraph_check_output_min_max(xnn_node_type_divide, output_min, output_max)) != xnn_status_success) {
+  if ((status =xnn_subgraph_check_output_min_max(xnn_node_type_multiply, output_min, output_max)) != xnn_status_success) {
     return status;
   }
 
