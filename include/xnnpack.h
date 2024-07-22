@@ -266,9 +266,10 @@ enum xnn_datatype {
   /// Dynamically quantized 8-bit signed integers packed with their per-row
   /// quantization parameters.
   xnn_datatype_qpint8 = 10,
-
+  /// 16-bit signed integers.
+  xnn_datatype_int16 = 11,
   /// 32-bit signed integers.
-  xnn_datatype_int32 = 11,
+  xnn_datatype_int32 = 12,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.
