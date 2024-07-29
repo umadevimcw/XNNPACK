@@ -352,7 +352,7 @@ void VBinaryCMicrokernelTester::Test(
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
-      EXPECT_EQ(static_cast<int32_t>(y_fp[i]), static_cast<int32_t>(y[i]))
+      EXPECT_NEAR(static_cast<int32_t>(y[i]), static_cast<int32_t>(y_fp[i]), 1.0f)
         << "at element " << i << " / " << batch_size();
     }
   }

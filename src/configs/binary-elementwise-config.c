@@ -567,15 +567,6 @@ static void init_qs16_vmul_config(void) {
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
   assert(hardware_config != NULL);
-  if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-    qs16_vmul_config.minmax.op_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__avx512bw_u32;
-    qs16_vmul_config.minmax.opc_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__avx512bw_u32;
-    qs16_vmul_config.minmax.ropc_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__avx512bw_u32;
-    qs16_vmul_config.minmax.element_tile = 32;
-  }
   if (hardware_config->use_x86_avx2) {
     qs16_vmul_config.minmax.op_ukernel =
         (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__avx2_u16;

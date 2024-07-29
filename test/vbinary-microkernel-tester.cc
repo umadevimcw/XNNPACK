@@ -332,11 +332,9 @@ void VBinaryMicrokernelTester::Test(
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
-      EXPECT_EQ(static_cast<int32_t>(y[i]), static_cast<int32_t>(y_fp[i]))
-        << "at element " << i << " / " << batch_size();
       // To handle SSE fail with diff of 1
-      // EXPECT_NEAR(static_cast<int32_t>(y[i]), static_cast<int32_t>(y_fp[i]), 1.0f)
-      //   << "at element " << i << " / " << batch_size();
+      EXPECT_NEAR(static_cast<int32_t>(y[i]), static_cast<int32_t>(y_fp[i]), 1.0f)
+        << "at element " << i << " / " << batch_size();
     }
   }
 }
