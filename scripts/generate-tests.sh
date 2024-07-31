@@ -193,6 +193,8 @@ tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qu
 
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/qs16-vmul.yaml   --output test/qs16-vmul.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qs16-vmulc.yaml    --output test/qs16-vmulc.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/s32-vmax.yaml   --output test/s32-vmax.cc &
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/s32-vmaxc.yaml    --output test/s32-vmaxc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/s32-vmul.yaml   --output test/s32-vmul.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/s32-vmulc.yaml    --output test/s32-vmulc.cc &
 

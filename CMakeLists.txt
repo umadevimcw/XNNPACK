@@ -2787,6 +2787,18 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs16-vmulc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME qs16-vmulc-test COMMAND qs16-vmulc-test)
 
+  ADD_EXECUTABLE(s32-vmax-test test/s32-vmax.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vmax-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vmax-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vmax-test COMMAND s32-vmax-test)
+
+  ADD_EXECUTABLE(s32-vmaxc-test test/s32-vmaxc.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vmaxc-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vmaxc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vmaxc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vmaxc-test COMMAND s32-vmaxc-test)
+
   ADD_EXECUTABLE(s32-vmul-test test/s32-vmul.cc)
   TARGET_INCLUDE_DIRECTORIES(s32-vmul-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(s32-vmul-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
