@@ -69,7 +69,7 @@ static XNN_INLINE xnn_simd_s16_t xnn_set1_s16(int16_t v) {
 
 static XNN_INLINE xnn_simd_s16_t xnn_set1_or_load_s16(const int16_t* v) {
 #if XNN_ARCH_X86
-  return _mm512_load_epiint16_t((const __m128i*)v);
+  return _mm512_load_si512((const __m128i*)v);
 #else
   return _mm512_set1_epi16(*v);
 #endif
