@@ -191,6 +191,8 @@ tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qs
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qu8-vmulc-minmax-fp32.yaml --output test/qu8-vmulc-minmax-fp32.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qu8-vmulc-minmax-rndnu.yaml --output test/qu8-vmulc-minmax-rndnu.cc &
 
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/qs16-vmax.yaml   --output test/qs16-vmax.cc &
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qs16-vmaxc.yaml    --output test/qs16-vmaxc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/qs16-vmul.yaml   --output test/qs16-vmul.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qs16-vmulc.yaml    --output test/qs16-vmulc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/s32-vmax.yaml   --output test/s32-vmax.cc &

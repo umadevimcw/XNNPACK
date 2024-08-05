@@ -278,6 +278,8 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-sse41-u4.c
   src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-sse41-u8.c
   src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-sse41-u16.c
+  src/qs16-vmax/gen/qs16-vmax-minmax-sse41.c
+  src/qs16-vmax/gen/qs16-vmaxc-minmax-sse41.c
   src/qs16-vmul/gen/qs16-vmul-minmax-sse41.c
   src/qs16-vmul/gen/qs16-vmulc-minmax-sse41.c
   src/qu8-dwconv/gen/qu8-dwconv-5f5m5l8c4s4r-minmax-fp32-sse41-mul32.c

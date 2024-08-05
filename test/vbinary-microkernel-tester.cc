@@ -315,6 +315,21 @@ void VBinaryMicrokernelTester::Test(
     // Compute reference results.
     for (size_t i = 0; i < batch_size(); i++) {
       switch (op_type) {
+        case OpType::Max:{
+          const int32_t a_quantize = (static_cast<int32_t>(a_data[i]) - static_cast<int32_t>(a_zero_point_s16()));
+          const int32_t b_quantize = (static_cast<int32_t>(b_data[i]) - static_cast<int32_t>(b_zero_point_s16()));       
+          const int32_t acc = (a_quantize > b_quantize) ? a_quantize : b_quantize;
+          int32_t res = static_cast<int32_t>(y_zero_point_s16()) +
+            static_cast<int32_t>(product_output_scale * static_cast<float>(acc));
+          y_fp[i] = static_cast<float>(res);
+          y_fp[i] = std::max<float>(
+              y_fp[i], static_cast<int16_t>(static_cast<int32_t>(qmin_s16())));
+          y_fp[i] = std::min<float>(
+              y_fp[i], static_cast<int16_t>(static_cast<int32_t>(qmax_s16())));
+          y_ref[i] = requantize(acc, product_output_scale, y_zero_point_s16(),
+                                qmin_s16(), qmax_s16());
+        }  
+        break;
         case OpType::Mul:{
           const int32_t acc = (static_cast<int32_t>(a_data[i]) -
                               static_cast<int32_t>(a_zero_point_s16())) *
