@@ -6584,8 +6584,8 @@ size_t xnn_init_qs8_add_minmax_scalar_params(
   return sizeof(params->scalar);
 }
 
-size_t xnn_init_qs16_mul_minmax_params(
-  union xnn_qs16_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
+size_t xnn_init_qs16_minmax_params(
+  union xnn_qs16_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int16_t a_zero_point,
   int16_t b_zero_point,
   float scale,

@@ -303,7 +303,7 @@ void VBinaryCMicrokernelTester::Test(
 
 void VBinaryCMicrokernelTester::Test(
     xnn_qs16_vbinary_ukernel_fn vbinary, OpType op_type,
-    xnn_init_qs16_mul_minmax_params_fn init_params,xnn_qs16_requantize_fn requantize) const {
+    xnn_init_qs16_minmax_params_fn init_params,xnn_qs16_requantize_fn requantize) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<int32_t> s16dist(
       std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max());
@@ -326,13 +326,15 @@ void VBinaryCMicrokernelTester::Test(
     // Prepare parameters.
     const float product_scale = a_scale() * b_scale();
     const float product_output_scale = product_scale / y_scale();
-    xnn_qs16_mul_minmax_params params;
+    xnn_qs16_minmax_params params;
     if (init_params != nullptr) {
       init_params(&params, a_zero_point_s16(), b_zero_point_s16(), product_output_scale, y_zero_point_s16(),qmin_s16(),qmax_s16());
     }
 
     // Compute reference results.
     for (size_t i = 0; i < batch_size(); i++) {
+      switch (op_type) {
+        case OpType::MulC:{
           const int32_t acc =
               (static_cast<int32_t>(a_data[i]) -
               static_cast<int32_t>(a_zero_point_s16())) *
@@ -346,6 +348,9 @@ void VBinaryCMicrokernelTester::Test(
               y_fp[i], static_cast<int16_t>(static_cast<int32_t>(qmax_s16())));
           y_ref[i] = requantize(acc, product_output_scale, y_zero_point_s16(),
                                 qmin_s16(), qmax_s16());
+        }
+        break;
+      }
     }
     // Call optimized micro-kernel.
     vbinary(batch_size() * sizeof(int16_t), a_data, &b, y.data(), &params);

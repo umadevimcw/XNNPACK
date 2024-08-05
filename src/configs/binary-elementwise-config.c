@@ -545,7 +545,7 @@ static void init_qs16_vmul_config(void) {
         (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__neon_u8;
     qs16_vmul_config.minmax.ropc_ukernel =
         (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__neon_u8;
-    qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+    qs16_vmul_config.init.qs16_minmax = xnn_init_qs16_minmax_params;
     qs16_vmul_config.minmax.element_tile = 8;
   } else if (!XNN_PLATFORM_MOBILE) {
     qs16_vmul_config.minmax.op_ukernel =
@@ -554,7 +554,7 @@ static void init_qs16_vmul_config(void) {
         (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u2;
     qs16_vmul_config.minmax.ropc_ukernel =
         (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u2;
-    qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+    qs16_vmul_config.init.qs16_minmax = xnn_init_qs16_minmax_params;
     qs16_vmul_config.minmax.element_tile = 2;
   }
 #elif XNN_ARCH_ARM64
@@ -564,7 +564,7 @@ static void init_qs16_vmul_config(void) {
       (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__neon_u8;
   qs16_vmul_config.minmax.ropc_ukernel =
       (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__neon_u8;
-  qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+  qs16_vmul_config.init.qs16_minmax = xnn_init_qs16_minmax_params;
   qs16_vmul_config.minmax.element_tile = 8;
 #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
   const struct xnn_hardware_config* hardware_config =
@@ -577,7 +577,7 @@ static void init_qs16_vmul_config(void) {
         (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__avx512bw_u32;
     qs16_vmul_config.minmax.ropc_ukernel =
         (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__avx512bw_u32;
-    qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+    qs16_vmul_config.init.qs16_minmax = xnn_init_qs16_minmax_params;
     qs16_vmul_config.minmax.element_tile = 32;
   }
   if (hardware_config->use_x86_avx2) {
@@ -587,7 +587,7 @@ static void init_qs16_vmul_config(void) {
         (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__avx2_u16;
     qs16_vmul_config.minmax.ropc_ukernel =
         (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__avx2_u16;
-    qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+    qs16_vmul_config.init.qs16_minmax = xnn_init_qs16_minmax_params;
     qs16_vmul_config.minmax.element_tile = 16;
   } else {
     qs16_vmul_config.minmax.op_ukernel =
@@ -596,7 +596,7 @@ static void init_qs16_vmul_config(void) {
         (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__sse41_u8;
     qs16_vmul_config.minmax.ropc_ukernel =
         (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__sse41_u8;
-    qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+    qs16_vmul_config.init.qs16_minmax = xnn_init_qs16_minmax_params;
     qs16_vmul_config.minmax.element_tile = 8;
   }
 #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -606,7 +606,7 @@ static void init_qs16_vmul_config(void) {
       (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__wasmsimd_u16;
   qs16_vmul_config.minmax.ropc_ukernel =
       (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__wasmsimd_u16;
-  qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+  qs16_vmul_config.init.qs16_minmax = xnn_init_qs16_minmax_params;
   qs16_vmul_config.minmax.element_tile = 16;
 #else
   qs16_vmul_config.minmax.op_ukernel =
@@ -615,7 +615,7 @@ static void init_qs16_vmul_config(void) {
       (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u2;
   qs16_vmul_config.minmax.ropc_ukernel =
       (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u2;
-  qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+  qs16_vmul_config.init.qs16_minmax = xnn_init_qs16_minmax_params;
   qs16_vmul_config.minmax.element_tile = 2;
 #endif
 }

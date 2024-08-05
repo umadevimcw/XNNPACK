@@ -815,12 +815,12 @@ enum xnn_status xnn_create_multiply_nd_qs16(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_qs16_mul_minmax_params params;
-  union xnn_qs16_mul_minmax_params params2;
-  assert(qs16_vmul_config->init.qs16_mul != NULL);
-  qs16_vmul_config->init.qs16_mul(&params, input1_zero_point, input2_zero_point,
+  union xnn_qs16_minmax_params params;
+  union xnn_qs16_minmax_params params2;
+  assert(qs16_vmul_config->init.qs16_minmax != NULL);
+  qs16_vmul_config->init.qs16_minmax(&params, input1_zero_point, input2_zero_point,
                                   product_output_scale, output_zero_point,output_min,output_max);
-  qs16_vmul_config->init.qs16_mul(&params2, input2_zero_point,
+  qs16_vmul_config->init.qs16_minmax(&params2, input2_zero_point,
                                   input1_zero_point, product_output_scale,
                                   output_zero_point,output_min,output_max);
 
@@ -1601,9 +1601,9 @@ enum xnn_status xnn_reshape_multiply_nd_qs16(
   return reshape_binary_elementwise_nd(
       mul_op, xnn_operator_type_multiply_nd_qs16, num_input1_dims, input1_shape,
       num_input2_dims, input2_shape,
-      /*log2_element_size=*/XNN_LOG2_SIZEOF_INT16_T, &mul_op->params.qs16_mul,
-      sizeof(mul_op->params.qs16_mul), &mul_op->params.qs16_mul,
-      sizeof(mul_op->params.qs16_mul), threadpool);
+      /*log2_element_size=*/XNN_LOG2_SIZEOF_INT16_T, &mul_op->params.qs16_minmax,
+      sizeof(mul_op->params.qs16_minmax), &mul_op->params.qs16_minmax,
+      sizeof(mul_op->params.qs16_minmax), threadpool);
 }
 
 enum xnn_status xnn_reshape_multiply_nd_s32(

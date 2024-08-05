@@ -25,7 +25,7 @@ void xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u1(
     const int16_t* input_a,
     const int16_t* input_b,
     int16_t* output,
-    const union xnn_qs16_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qs16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int16_t) == 0);
@@ -80,7 +80,7 @@ void xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u2(
     const int16_t* input_a,
     const int16_t* input_b,
     int16_t* output,
-    const union xnn_qs16_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qs16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int16_t) == 0);
@@ -179,7 +179,7 @@ void xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u4(
     const int16_t* input_a,
     const int16_t* input_b,
     int16_t* output,
-    const union xnn_qs16_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qs16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int16_t) == 0);
@@ -316,7 +316,7 @@ void xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u8(
     const int16_t* input_a,
     const int16_t* input_b,
     int16_t* output,
-    const union xnn_qs16_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qs16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int16_t) == 0);

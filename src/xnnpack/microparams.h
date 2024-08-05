@@ -1746,7 +1746,7 @@ union xnn_qs8_f32_cvt_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
-union xnn_qs16_mul_minmax_params {
+union xnn_qs16_minmax_params {
   struct {
     int16_t a_zero_point;
     int16_t b_zero_point;
