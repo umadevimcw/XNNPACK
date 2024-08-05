@@ -833,6 +833,12 @@ void BinaryElementwiseOperatorTester::TestQS16() const {
     xnn_operator_t binary_elementwise_op = nullptr;
 
     switch (operation_type()) {
+      case OperationType::Maximum:
+        ASSERT_EQ(
+          xnn_status_success, xnn_create_maximum_nd_qs16(
+                                input1_zero_point(), input1_scale(), input2_zero_point(), input2_scale(),
+                                output_zero_point(), output_scale(), qmin(), qmax(), 0, &binary_elementwise_op));
+        break;
       case OperationType::Multiply:
         ASSERT_EQ(
           xnn_status_success, xnn_create_multiply_nd_qs16(
@@ -849,6 +855,17 @@ void BinaryElementwiseOperatorTester::TestQS16() const {
         auto_binary_elementwise_op(binary_elementwise_op, xnn_delete_operator);
 
     switch (operation_type()) {
+      case OperationType::Maximum:
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_reshape_maximum_nd_qs16(
+                binary_elementwise_op, num_input1_dims(), input1_shape().data(),
+                num_input2_dims(), input2_shape().data(),
+                /*threadpool=*/nullptr));
+        ASSERT_EQ(xnn_status_success, xnn_setup_maximum_nd_qs16(
+                                          binary_elementwise_op, input1.data(),
+                                          input2.data(), output.data()));
+        break;
       case OperationType::Multiply:
         ASSERT_EQ(
             xnn_status_success,
