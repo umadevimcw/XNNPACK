@@ -545,7 +545,7 @@ static void init_qs16_vmin_config(void) {
         (xnn_vbinary_ukernel_fn)xnn_qs16_vminc_minmax_fp32_ukernel__neon_u8;
     qs16_vmin_config.minmax.ropc_ukernel =
         (xnn_vbinary_ukernel_fn)xnn_qs16_vminc_minmax_fp32_ukernel__neon_u8;
-    qs16_vmin_config.init.qs16_min = xnn_init_qs16_minmax_params;
+    qs16_vmin_config.init.qs16_min = xnn_init_qs16_min_minmax_params;
     qs16_vmin_config.minmax.element_tile = 8;
   } else if (!XNN_PLATFORM_MOBILE) {
     qs16_vmin_config.minmax.op_ukernel =
@@ -554,7 +554,7 @@ static void init_qs16_vmin_config(void) {
         (xnn_vbinary_ukernel_fn)xnn_qs16_vminc_minmax_fp32_ukernel__scalar_u2;
     qs16_vmin_config.minmax.ropc_ukernel =
         (xnn_vbinary_ukernel_fn)xnn_qs16_vminc_minmax_fp32_ukernel__scalar_u2;
-    qs16_vmin_config.init.qs16_min = xnn_init_qs16_minmax_params;
+    qs16_vmin_config.init.qs16_min = xnn_init_qs16_min_minmax_params;
     qs16_vmin_config.minmax.element_tile = 2;
   }
 #elif XNN_ARCH_ARM64
@@ -564,7 +564,7 @@ static void init_qs16_vmin_config(void) {
       (xnn_vbinary_ukernel_fn)xnn_qs16_vminc_minmax_fp32_ukernel__neon_u8;
   qs16_vmin_config.minmax.ropc_ukernel =
       (xnn_vbinary_ukernel_fn)xnn_qs16_vminc_minmax_fp32_ukernel__neon_u8;
-  qs16_vmin_config.init.qs16_min = xnn_init_qs16_minmax_params;
+  qs16_vmin_config.init.qs16_min = xnn_init_qs16_min_minmax_params;
   qs16_vmin_config.minmax.element_tile = 8;
 #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
   const struct xnn_hardware_config* hardware_config =
@@ -606,7 +606,7 @@ static void init_qs16_vmin_config(void) {
       (xnn_vbinary_ukernel_fn)xnn_qs16_vminc_minmax_fp32_ukernel__wasmsimd_u16;
   qs16_vmin_config.minmax.ropc_ukernel =
       (xnn_vbinary_ukernel_fn)xnn_qs16_vminc_minmax_fp32_ukernel__wasmsimd_u16;
-  qs16_vmin_config.init.qs16_min = xnn_init_qs16_minmax_params;
+  qs16_vmin_config.init.qs16_min = xnn_init_qs16_min_minmax_params;
   qs16_vmin_config.minmax.element_tile = 16;
 #else
   qs16_vmin_config.minmax.op_ukernel =
@@ -615,7 +615,7 @@ static void init_qs16_vmin_config(void) {
       (xnn_vbinary_ukernel_fn)xnn_qs16_vminc_minmax_fp32_ukernel__scalar_u2;
   qs16_vmin_config.minmax.ropc_ukernel =
       (xnn_vbinary_ukernel_fn)xnn_qs16_vminc_minmax_fp32_ukernel__scalar_u2;
-  qs16_vmin_config.init.qs16_min = xnn_init_qs16_minmax_params;
+  qs16_vmin_config.init.qs16_min = xnn_init_qs16_min_minmax_params;
   qs16_vmin_config.minmax.element_tile = 2;
 #endif
 }
