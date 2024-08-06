@@ -532,6 +532,78 @@ enum xnn_status xnn_create_minimum_nd_f32(
     minimum_op_out);
 }
 
+enum xnn_status xnn_create_minimum_nd_qs16(
+    int16_t input1_zero_point,
+    float input1_scale,
+    int16_t input2_zero_point,
+    float input2_scale,
+    int16_t output_zero_point,
+    float output_scale,
+    int16_t output_min,
+    int16_t output_max,
+    uint32_t flags,
+    xnn_operator_t* minimum_op_out)
+{
+   if (input1_scale <= 0.0f || !isnormal(input1_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input 1 scale: scale must be finite and positive",
+      xnn_operator_type_to_string(xnn_operator_type_minimum_nd_qs16), input1_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (input2_scale <= 0.0f || !isnormal(input2_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input 2 scale: scale must be finite and positive",
+      xnn_operator_type_to_string(xnn_operator_type_minimum_nd_qs16), input2_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_scale <= 0.0f || !isnormal(output_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale: scale must be finite and positive",
+      xnn_operator_type_to_string(xnn_operator_type_minimum_nd_qs16), output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  const float scale = input1_scale * input2_scale;
+  const float product_output_scale = scale / output_scale;
+  if (product_output_scale < 0x1.0p-16f || product_output_scale >= 0x1.0p+8f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g product-to-output scale ratio: scale ratio must be in [2**-16, 2**8) range",
+      xnn_operator_type_to_string(xnn_operator_type_minimum_nd_qs16), product_output_scale);
+    return xnn_status_unsupported_parameter;
+  }
+
+  if (output_min > output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%" PRId16 ", %" PRId16 "] output range: lower bound must be less than or equal to upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_minimum_nd_qs16), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  const struct xnn_binary_elementwise_config* qs16_vmin_config =
+      xnn_init_qs16_vmin_config();
+  if (qs16_vmin_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+      xnn_operator_type_to_string(xnn_operator_type_minimum_nd_qs16));
+    return xnn_status_unsupported_hardware;
+  }
+
+  union xnn_qs16_min_minmax_params params;
+  union xnn_qs16_min_minmax_params params2;
+  assert(qs16_vmin_config->init.qs16_minmax != NULL);
+  qs16_vmin_config->init.qs16_min(&params, input1_zero_point, input2_zero_point,
+                                  product_output_scale, output_zero_point,output_min,output_max);
+  qs16_vmin_config->init.qs16_min(&params2, input2_zero_point,
+                                  input1_zero_point, product_output_scale,
+                                  output_zero_point,output_min,output_max);
+
+  return create_binary_elementwise_nd(flags, &params, &params2, sizeof(params),
+                                      xnn_operator_type_minimum_nd_qs16,
+                                      &qs16_vmin_config->minmax,
+                                      minimum_op_out);
+}
+
 enum xnn_status xnn_create_multiply_nd_f16(
     float output_min,
     float output_max,
@@ -1471,6 +1543,21 @@ enum xnn_status xnn_reshape_minimum_nd_f32(
     threadpool);
 }
 
+enum xnn_status xnn_reshape_minimum_nd_qs16(
+    xnn_operator_t min_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    pthreadpool_t threadpool)
+{
+  return reshape_binary_elementwise_nd(
+      min_op, xnn_operator_type_minimum_nd_qs16, num_input1_dims, input1_shape,
+      num_input2_dims, input2_shape,
+      /*log2_element_size=*/XNN_LOG2_SIZEOF_INT16_T, &min_op->params.qs16_min,
+      sizeof(min_op->params.qs16_min), &min_op->params.qs16_min,
+      sizeof(min_op->params.qs16_min), threadpool);
+}
 
 enum xnn_status xnn_reshape_multiply_nd_f16(
     xnn_operator_t multiply_op,
@@ -1830,6 +1917,17 @@ enum xnn_status xnn_setup_minimum_nd_f32(
 {
   return setup_binary_elementwise_nd(
     minimum_op, xnn_operator_type_minimum_nd_f32,
+    input1, input2, output);
+}
+
+enum xnn_status xnn_setup_minimum_nd_qs16(
+    xnn_operator_t min_op,
+    const int16_t* input1,
+    const int16_t* input2,
+    int16_t* output)
+{
+  return setup_binary_elementwise_nd(
+    min_op, xnn_operator_type_minimum_nd_qs16,
     input1, input2, output);
 }
 
