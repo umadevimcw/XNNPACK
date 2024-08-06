@@ -30545,8 +30545,8 @@ void xnn_qs16_vmul_minmax_fp32_ukernel__neon_u8(
     vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
 
     xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
-    vy = xnn_max_s16(vy,voutput_min);
-    vy = xnn_min_s16(vy,voutput_max);
+    vy = xnn_max_s16(vy, voutput_min);
+    vy = xnn_min_s16(vy, voutput_max);
 
     xnn_storeu_s16(output, vy);
     output += xnn_simd_size_s16;
@@ -30576,8 +30576,8 @@ void xnn_qs16_vmul_minmax_fp32_ukernel__neon_u8(
     vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
     
     xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
-    vy = xnn_max_s16(vy,voutput_min);
-    vy = xnn_min_s16(vy,voutput_max);
+    vy = xnn_max_s16(vy, voutput_min);
+    vy = xnn_min_s16(vy, voutput_max);
 
     xnn_store_tail_s16(output, vy, batch >> XNN_LOG2_SIZEOF_INT16_T);
   }
@@ -30630,8 +30630,8 @@ void xnn_qs16_vmulc_minmax_fp32_ukernel__neon_u8(
     vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
 
     xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
-    vy = xnn_max_s16(vy,voutput_min);
-    vy = xnn_min_s16(vy,voutput_max);
+    vy = xnn_max_s16(vy, voutput_min);
+    vy = xnn_min_s16(vy, voutput_max);
 
     xnn_storeu_s16(output, vy);
     output += xnn_simd_size_s16;
@@ -30654,8 +30654,8 @@ void xnn_qs16_vmulc_minmax_fp32_ukernel__neon_u8(
     vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
     
     xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
-    vy = xnn_max_s16(vy,voutput_min);
-    vy = xnn_min_s16(vy,voutput_max);
+    vy = xnn_max_s16(vy, voutput_min);
+    vy = xnn_min_s16(vy, voutput_max);
 
     xnn_store_tail_s16(output, vy, batch >> XNN_LOG2_SIZEOF_INT16_T);
   }
