@@ -29,6 +29,7 @@
 class VUnaryMicrokernelTester {
  public:
   enum class OpType {
+    PopCount,
     ReLU,
     RoundToNearestEven,
     RoundTowardsZero,
@@ -236,6 +237,13 @@ class VUnaryMicrokernelTester {
             xnn_init_u8_minmax_params_fn init_params) const;
 
   void Test(xnn_u64_u32_vsqrtshift_ukernel_fn vsqrtshift) const;
+
+  void Test(xnn_s32_vpopcnt_ukernel_ukernel_fn vpopcnt) const;
+
+#if XNN_PLATFORM_JIT
+  void Test(xnn_vrelu_generator_fn generator, size_t k_unroll,
+            bool use_locals) const;
+#endif  // XNN_PLATFORM_JIT
 
  private:
   // Generic test function for `fp32` `vunary` kernels.
