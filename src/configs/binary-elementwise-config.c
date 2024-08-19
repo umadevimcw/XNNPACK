@@ -6,14 +6,9 @@
 #include <assert.h>
 #include <stddef.h>
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
-
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/vbinary.h"
@@ -36,61 +31,37 @@ static struct xnn_binary_elementwise_config f32_vrem_config = {0};
 static struct xnn_binary_elementwise_config f32_vsub_config = {0};
 static struct xnn_binary_elementwise_config f32_vsqrdiff_config = {0};
 
-
 static struct xnn_binary_elementwise_config s32_vmul_config = {0};
 
 static struct xnn_binary_elementwise_config qs8_vadd_config = {0};
 static struct xnn_binary_elementwise_config qs8_vmul_config = {0};
+static struct xnn_binary_elementwise_config qs16_vmul_config = {0};
 
 static struct xnn_binary_elementwise_config qu8_vadd_config = {0};
 static struct xnn_binary_elementwise_config qu8_vmul_config = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard_f16_vadd = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_vdiv = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_vmax = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_vmin = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_vmul = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_vsub = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_vsqrdiff = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_vadd = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_vcopysign = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_vdiv = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_vmax = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_vmin = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_vmul = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_vrem = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_vsub = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_vsqrdiff = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_s32_vmul = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qs8_vadd = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qs8_vmul = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qu8_vadd = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qu8_vmul = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard_f16_vadd = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_vdiv = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_vmax = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_vmin = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_vmul = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_vsub = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_vsqrdiff = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_vadd = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_vcopysign = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_vdiv = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_vmax = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_vmin = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_vmul = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_vrem = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_vsub = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_vsqrdiff = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_s32_vmul = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qs8_vadd = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qs8_vmul = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qu8_vadd = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qu8_vmul = PTHREAD_ONCE_INIT;
-#endif
-
+XNN_INIT_ONCE_GUARD(f16_vadd);
+XNN_INIT_ONCE_GUARD(f16_vdiv);
+XNN_INIT_ONCE_GUARD(f16_vmax);
+XNN_INIT_ONCE_GUARD(f16_vmin);
+XNN_INIT_ONCE_GUARD(f16_vmul);
+XNN_INIT_ONCE_GUARD(f16_vsub);
+XNN_INIT_ONCE_GUARD(f16_vsqrdiff);
+XNN_INIT_ONCE_GUARD(f32_vadd);
+XNN_INIT_ONCE_GUARD(f32_vcopysign);
+XNN_INIT_ONCE_GUARD(f32_vdiv);
+XNN_INIT_ONCE_GUARD(f32_vmax);
+XNN_INIT_ONCE_GUARD(f32_vmin);
+XNN_INIT_ONCE_GUARD(f32_vmul);
+XNN_INIT_ONCE_GUARD(f32_vrem);
+XNN_INIT_ONCE_GUARD(f32_vsub);
+XNN_INIT_ONCE_GUARD(f32_vsqrdiff);
+XNN_INIT_ONCE_GUARD(s32_vmul);
+XNN_INIT_ONCE_GUARD(qs8_vadd);
+XNN_INIT_ONCE_GUARD(qs8_vmul);
+XNN_INIT_ONCE_GUARD(qs16_vmul);
+XNN_INIT_ONCE_GUARD(qu8_vadd);
+XNN_INIT_ONCE_GUARD(qu8_vmul);
 
 static void init_f16_vadd_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
@@ -531,6 +502,92 @@ static void init_f32_vcopysign_config(void) {
   #endif
 }
 
+static void init_qs16_vmul_config(void) {
+#if XNN_ARCH_ARM
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->use_arm_neon) {
+    qs16_vmul_config.minmax.op_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__neon_u8;
+    qs16_vmul_config.minmax.opc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__neon_u8;
+    qs16_vmul_config.minmax.ropc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__neon_u8;
+    qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+    qs16_vmul_config.minmax.element_tile = 8;
+  } else if (!XNN_PLATFORM_MOBILE) {
+    qs16_vmul_config.minmax.op_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__scalar_u2;
+    qs16_vmul_config.minmax.opc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u2;
+    qs16_vmul_config.minmax.ropc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u2;
+    qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+    qs16_vmul_config.minmax.element_tile = 2;
+  }
+#elif XNN_ARCH_ARM64
+  qs16_vmul_config.minmax.op_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__neon_u8;
+  qs16_vmul_config.minmax.opc_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__neon_u8;
+  qs16_vmul_config.minmax.ropc_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__neon_u8;
+  qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+  qs16_vmul_config.minmax.element_tile = 8;
+#elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+    qs16_vmul_config.minmax.op_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__avx512bw_u32;
+    qs16_vmul_config.minmax.opc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__avx512bw_u32;
+    qs16_vmul_config.minmax.ropc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__avx512bw_u32;
+    qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+    qs16_vmul_config.minmax.element_tile = 32;
+  }
+  if (hardware_config->use_x86_avx2) {
+    qs16_vmul_config.minmax.op_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__avx2_u16;
+    qs16_vmul_config.minmax.opc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__avx2_u16;
+    qs16_vmul_config.minmax.ropc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__avx2_u16;
+    qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+    qs16_vmul_config.minmax.element_tile = 16;
+  } else {
+    qs16_vmul_config.minmax.op_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__sse41_u8;
+    qs16_vmul_config.minmax.opc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__sse41_u8;
+    qs16_vmul_config.minmax.ropc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__sse41_u8;
+    qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+    qs16_vmul_config.minmax.element_tile = 8;
+  }
+#elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  qs16_vmul_config.minmax.op_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__wasmsimd_u16;
+  qs16_vmul_config.minmax.opc_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__wasmsimd_u16;
+  qs16_vmul_config.minmax.ropc_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__wasmsimd_u16;
+  qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+  qs16_vmul_config.minmax.element_tile = 16;
+#else
+  qs16_vmul_config.minmax.op_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__scalar_u2;
+  qs16_vmul_config.minmax.opc_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u2;
+  qs16_vmul_config.minmax.ropc_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u2;
+  qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+  qs16_vmul_config.minmax.element_tile = 2;
+#endif
+}
 static void init_f32_vrem_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -1395,123 +1452,12 @@ static void init_qu8_vmul_config(void) {
   #endif
 }
 
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_f16_vadd_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_vadd_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_vdiv_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_vdiv_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_vmax_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_vmax_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_vmin_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_vmin_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_vmul_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_vmul_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_vsub_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_vsub_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_vsqrdiff_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_vsqrdiff_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vadd_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vadd_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vcopysign_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vcopysign_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vrem_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vrem_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_s32_vmul_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_s32_vmul_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vdiv_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vdiv_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vmax_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vmax_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vmin_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vmin_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vmul_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vmul_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vsub_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vsub_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vsqrdiff_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vsqrdiff_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qs8_vadd_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qs8_vadd_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qs8_vmul_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qs8_vmul_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qu8_vadd_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qu8_vadd_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qu8_vmul_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qu8_vmul_config();
-    return TRUE;
-  }
-#endif
-
 const struct xnn_binary_elementwise_config* xnn_init_f16_vadd_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_vadd, &init_f16_vadd_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_vadd, &init_f16_vadd_config);
-  #endif
+  XNN_INIT_ONCE(f16_vadd);
   return &f16_vadd_config;
 }
 
@@ -1520,11 +1466,7 @@ const struct xnn_binary_elementwise_config* xnn_init_f16_vdiv_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_vdiv, &init_f16_vdiv_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_vdiv, &init_f16_vdiv_config);
-  #endif
+  XNN_INIT_ONCE(f16_vdiv);
   return &f16_vdiv_config;
 }
 
@@ -1533,11 +1475,7 @@ const struct xnn_binary_elementwise_config* xnn_init_f16_vmax_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_vmax, &init_f16_vmax_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_vmax, &init_f16_vmax_config);
-  #endif
+  XNN_INIT_ONCE(f16_vmax);
   return &f16_vmax_config;
 }
 
@@ -1546,11 +1484,7 @@ const struct xnn_binary_elementwise_config* xnn_init_f16_vmin_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_vmin, &init_f16_vmin_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_vmin, &init_f16_vmin_config);
-  #endif
+  XNN_INIT_ONCE(f16_vmin);
   return &f16_vmin_config;
 }
 
@@ -1559,11 +1493,7 @@ const struct xnn_binary_elementwise_config* xnn_init_f16_vmul_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_vmul, &init_f16_vmul_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_vmul, &init_f16_vmul_config);
-  #endif
+  XNN_INIT_ONCE(f16_vmul);
   return &f16_vmul_config;
 }
 
@@ -1572,11 +1502,7 @@ const struct xnn_binary_elementwise_config* xnn_init_f16_vsub_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_vsub, &init_f16_vsub_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_vsub, &init_f16_vsub_config);
-  #endif
+  XNN_INIT_ONCE(f16_vsub);
   return &f16_vsub_config;
 }
 
@@ -1585,11 +1511,7 @@ const struct xnn_binary_elementwise_config* xnn_init_f16_vsqrdiff_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_vsqrdiff, &init_f16_vsqrdiff_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_vsqrdiff, &init_f16_vsqrdiff_config);
-  #endif
+  XNN_INIT_ONCE(f16_vsqrdiff);
   return &f16_vsqrdiff_config;
 }
 
@@ -1598,11 +1520,7 @@ const struct xnn_binary_elementwise_config* xnn_init_f32_vadd_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_vadd, &init_f32_vadd_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_vadd, &init_f32_vadd_config);
-  #endif
+  XNN_INIT_ONCE(f32_vadd);
   return &f32_vadd_config;
 }
 
@@ -1611,12 +1529,17 @@ const struct xnn_binary_elementwise_config* xnn_init_f32_vcopysign_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_vcopysign, &init_f32_vcopysign_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_vcopysign, &init_f32_vcopysign_config);
-  #endif
+  XNN_INIT_ONCE(f32_vcopysign);
   return &f32_vcopysign_config;
+}
+
+const struct xnn_binary_elementwise_config* xnn_init_qs16_vmul_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(qs16_vmul);
+  return &qs16_vmul_config;
 }
 
 const struct xnn_binary_elementwise_config* xnn_init_f32_vrem_config() {
@@ -1624,11 +1547,7 @@ const struct xnn_binary_elementwise_config* xnn_init_f32_vrem_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_vrem, &init_f32_vrem_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_vrem, &init_f32_vrem_config);
-  #endif
+  XNN_INIT_ONCE(f32_vrem);
   return &f32_vrem_config;
 }
 
@@ -1637,11 +1556,7 @@ const struct xnn_binary_elementwise_config* xnn_init_s32_vmul_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_s32_vmul, &init_s32_vmul_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_s32_vmul, &init_s32_vmul_config);
-  #endif
+  XNN_INIT_ONCE(s32_vmul);
   return &s32_vmul_config;
 }
 
@@ -1650,11 +1565,7 @@ const struct xnn_binary_elementwise_config* xnn_init_f32_vdiv_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_vdiv, &init_f32_vdiv_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_vdiv, &init_f32_vdiv_config);
-  #endif
+  XNN_INIT_ONCE(f32_vdiv);
   return &f32_vdiv_config;
 }
 
@@ -1663,11 +1574,7 @@ const struct xnn_binary_elementwise_config* xnn_init_f32_vmax_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_vmax, &init_f32_vmax_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_vmax, &init_f32_vmax_config);
-  #endif
+  XNN_INIT_ONCE(f32_vmax);
   return &f32_vmax_config;
 }
 
@@ -1676,11 +1583,7 @@ const struct xnn_binary_elementwise_config* xnn_init_f32_vmin_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_vmin, &init_f32_vmin_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_vmin, &init_f32_vmin_config);
-  #endif
+  XNN_INIT_ONCE(f32_vmin);
   return &f32_vmin_config;
 }
 
@@ -1689,11 +1592,7 @@ const struct xnn_binary_elementwise_config* xnn_init_f32_vmul_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_vmul, &init_f32_vmul_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_vmul, &init_f32_vmul_config);
-  #endif
+  XNN_INIT_ONCE(f32_vmul);
   return &f32_vmul_config;
 }
 
@@ -1702,11 +1601,7 @@ const struct xnn_binary_elementwise_config* xnn_init_f32_vsub_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_vsub, &init_f32_vsub_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_vsub, &init_f32_vsub_config);
-  #endif
+  XNN_INIT_ONCE(f32_vsub);
   return &f32_vsub_config;
 }
 
@@ -1715,11 +1610,7 @@ const struct xnn_binary_elementwise_config* xnn_init_f32_vsqrdiff_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_vsqrdiff, &init_f32_vsqrdiff_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_vsqrdiff, &init_f32_vsqrdiff_config);
-  #endif
+  XNN_INIT_ONCE(f32_vsqrdiff);
   return &f32_vsqrdiff_config;
 }
 
@@ -1728,11 +1619,7 @@ const struct xnn_binary_elementwise_config* xnn_init_qs8_vadd_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qs8_vadd, &init_qs8_vadd_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qs8_vadd, &init_qs8_vadd_config);
-  #endif
+  XNN_INIT_ONCE(qs8_vadd);
   return &qs8_vadd_config;
 }
 
@@ -1741,11 +1628,7 @@ const struct xnn_binary_elementwise_config* xnn_init_qs8_vmul_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qs8_vmul, &init_qs8_vmul_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qs8_vmul, &init_qs8_vmul_config);
-  #endif
+  XNN_INIT_ONCE(qs8_vmul);
   return &qs8_vmul_config;
 }
 
@@ -1754,11 +1637,7 @@ const struct xnn_binary_elementwise_config* xnn_init_qu8_vadd_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qu8_vadd, &init_qu8_vadd_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qu8_vadd, &init_qu8_vadd_config);
-  #endif
+  XNN_INIT_ONCE(qu8_vadd);
   return &qu8_vadd_config;
 }
 
@@ -1767,10 +1646,6 @@ const struct xnn_binary_elementwise_config* xnn_init_qu8_vmul_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qu8_vmul, &init_qu8_vmul_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qu8_vmul, &init_qu8_vmul_config);
-  #endif
+  XNN_INIT_ONCE(qu8_vmul);
   return &qu8_vmul_config;
 }

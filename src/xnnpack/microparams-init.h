@@ -342,6 +342,7 @@ DECLARE_INIT_F32_SCALE_PARAMS_FUNCTION(xnn_init_f32_scale_scalar_params)
 DECLARE_INIT_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f32_scaleminmax_scalar_params)
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f32_scaleminmax_sse_params)
+  DECLARE_INIT_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f32_scaleminmax_avx_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
@@ -454,6 +455,7 @@ DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_scalar_par
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_avx_params)
   DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_avxvnni_params)
+  DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_avxvnni_madd_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
@@ -488,6 +490,7 @@ DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_scalar_par
   DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_avx512vnni_params)
   DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_avx512vnni_madd_params)
   DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_avxvnni_params)
+  DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_avxvnni_madd_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_wasmsimd_params)
@@ -1268,15 +1271,21 @@ DECLARE_INIT_QS8_F32_CVT_PARAMS_FUNCTION(xnn_init_qs8_f32_cvt_scalar_params)
   DECLARE_INIT_QS8_F32_CVT_PARAMS_FUNCTION(xnn_init_qs8_f32_cvt_wasmsimd_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#define DECLARE_INIT_QS16_MUL_MINMAX_PARAMS_FUNCTION(fn_name)       \
+    XNN_INTERNAL size_t fn_name(                                      \
+        union xnn_qs16_mul_minmax_params params[XNN_MIN_ELEMENTS(1)], \
+        int16_t a_zero_point, int16_t b_zero_point, float scale,      \
+        int16_t output_zero_point,int16_t output_min,int16_t output_max);
 
-#define DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(fn_name)     \
-  XNN_INTERNAL size_t fn_name(                            \
-    union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
-    float input_output_scale,                             \
-    uint8_t input_zero_point,                             \
-    uint8_t output_zero_point);
+  DECLARE_INIT_QS16_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs16_mul_minmax_params)
 
-DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_scalar_params)
+#define DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(fn_name)       \
+    XNN_INTERNAL size_t fn_name(                              \
+        union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+        float input_output_scale, uint8_t input_zero_point,   \
+        uint8_t output_zero_point);
+
+  DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_scalar_params)
 #if XNN_ARCH_ARM
   DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_armsimd32_params)
 #endif  // XNN_ARCH_ARM
@@ -1303,23 +1312,6 @@ DECLARE_INIT_QU8_F32_CVT_PARAMS_FUNCTION(xnn_init_qu8_f32_cvt_scalar_params)
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_QU8_F32_CVT_PARAMS_FUNCTION(xnn_init_qu8_f32_cvt_neon_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  size_t xnn_init_x24_transpose_neon_tbl64_params(union xnn_x24_transpose_params params[XNN_MIN_ELEMENTS(1)]);
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM64
-  size_t xnn_init_x24_transpose_neon_tbl128_params(union xnn_x24_transpose_params params[XNN_MIN_ELEMENTS(1)]);
-  size_t xnn_init_x32_transpose_neon_tbl128_params(union xnn_x32_transpose_params params[XNN_MIN_ELEMENTS(1)]);
-#endif  // XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  size_t xnn_init_x24_transpose_ssse3_params(union xnn_x24_transpose_params params[XNN_MIN_ELEMENTS(1)]);
-  size_t xnn_init_x8_transpose_avx2_params(union xnn_x8_transpose_params params[XNN_MIN_ELEMENTS(1)]);
-  size_t xnn_init_x16_transpose_avx2_params(union xnn_x16_transpose_params params[XNN_MIN_ELEMENTS(1)]);
-  size_t xnn_init_x32_transpose_avx_params(union xnn_x32_transpose_params params[XNN_MIN_ELEMENTS(1)]);
-  size_t xnn_init_x64_transpose_avx_params(union xnn_x64_transpose_params params[XNN_MIN_ELEMENTS(1)]);
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_QU8_F32_CVT_PARAMS_FUNCTION(xnn_init_qu8_f32_cvt_sse2_params)

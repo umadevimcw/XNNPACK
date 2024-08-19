@@ -7,6 +7,8 @@
 //   Generator: tools/update-microkernels.py -a
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
@@ -17,11 +19,16 @@
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/lut.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/prefetch.h"
 #include "xnnpack/reduce.h"
+#include "xnnpack/simd/f32-avx512f.h"
+#include "xnnpack/simd/s16-avx512bw.h"
+#include "xnnpack/simd/s32-avx512f.h"
 #include "xnnpack/unaligned.h"
 #include "xnnpack/vbinary.h"
 #include "xnnpack/vcvt.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f16_f32_vcvt_ukernel__avx512skx_u16(
@@ -1542,9 +1549,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512skx_madd_prfm(
   const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
   const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
   const __m512i vsign_mask = _mm512_set1_epi8(params->avx512vnni.sign_mask);  // 0x80
-  const __m512i vkernel_sign_mask1 = _mm512_set1_epi8(params->avx512vnni.kernel_sign_mask1);  // 0x08
-  const __m512i vkernel_sign_mask2 = _mm512_set1_epi8(params->avx512vnni.kernel_sign_mask2);  // 0x88
-  const __m512i vvalue_mask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0x0F
+  const __m512i vmask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0x0F
   assert(params->avx512vnni.mask == (int8_t) 0x0F);
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);
@@ -1563,14 +1568,12 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512skx_madd_prfm(
 
       const __m512i vbb01234567x01234567 = _mm512_load_si512(w);
       const __m512i vbb89ABCDEFx01234567 = _mm512_load_si512((const int8_t*) w + 64);
-      const __m512i vbu01234567x01234567 = _mm512_xor_si512(vbb01234567x01234567, vkernel_sign_mask2);  // convert int4 to uint4
-      const __m512i vbu89ABCDEFx01234567 = _mm512_xor_si512(vbb89ABCDEFx01234567, vkernel_sign_mask2);
-      const __m512i vbs01234567x89ABCDEF = _mm512_srli_epi32(vbu01234567x01234567, 4);
-      const __m512i vbs89ABCDEFx89ABCDEF = _mm512_srli_epi32(vbu89ABCDEFx01234567, 4);
-      const __m512i vb01234567x01234567 = _mm512_and_si512(vbu01234567x01234567, vvalue_mask);
-      const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbu89ABCDEFx01234567, vvalue_mask);
-      const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbs01234567x89ABCDEF, vvalue_mask);
-      const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbs89ABCDEFx89ABCDEF, vvalue_mask);
+      const __m512i vbs01234567x89ABCDEF = _mm512_srli_epi32(vbb01234567x01234567, 4);
+      const __m512i vbs89ABCDEFx89ABCDEF = _mm512_srli_epi32(vbb89ABCDEFx01234567, 4);
+      const __m512i vb01234567x01234567 = _mm512_and_si512(vbb01234567x01234567, vmask);
+      const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbb89ABCDEFx01234567, vmask);
+      const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbs01234567x89ABCDEF, vmask);
+      const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbs89ABCDEFx89ABCDEF, vmask);
 
       vacc0x01234567 = _mm512_dpbusd_epi32_madd(vacc0x01234567, va0x01234567, vb01234567x01234567);
       vacc0x89ABCDEF = _mm512_dpbusd_epi32_madd(vacc0x89ABCDEF, va0x01234567, vb89ABCDEFx01234567);
@@ -1589,8 +1592,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512skx_madd_prfm(
 
       const __m512i vbb01234567x01234567 = _mm512_load_si512(w);
       const __m512i vbb89ABCDEFx01234567 = _mm512_load_si512((const int8_t*) w + 64);
-      const __m512i vb01234567x01234567 = _mm512_xor_si512(vbb01234567x01234567, vkernel_sign_mask1);  // convert int4 to uint4
-      const __m512i vb89ABCDEFx01234567 = _mm512_xor_si512(vbb89ABCDEFx01234567, vkernel_sign_mask1);
+      const __m512i vb01234567x01234567 = _mm512_and_si512(vbb01234567x01234567, vmask);
+      const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbb89ABCDEFx01234567, vmask);
 
       vacc0x01234567 = _mm512_dpbusd_epi32_madd(vacc0x01234567, va0x01234567, vb01234567x01234567);
       vacc0x89ABCDEF = _mm512_dpbusd_epi32_madd(vacc0x89ABCDEF, va0x01234567, vb89ABCDEFx01234567);
@@ -1720,9 +1723,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_8x16c8__avx512skx_madd_prfm(
   const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
   const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
   const __m512i vsign_mask = _mm512_set1_epi8(params->avx512vnni.sign_mask);  // 0x80
-  const __m512i vkernel_sign_mask1 = _mm512_set1_epi8(params->avx512vnni.kernel_sign_mask1);  // 0x08
-  const __m512i vkernel_sign_mask2 = _mm512_set1_epi8(params->avx512vnni.kernel_sign_mask2);  // 0x88
-  const __m512i vvalue_mask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0x0F
+  const __m512i vmask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0x0F
   assert(params->avx512vnni.mask == (int8_t) 0x0F);
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);
@@ -1781,14 +1782,12 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_8x16c8__avx512skx_madd_prfm(
 
       const __m512i vbb01234567x01234567 = _mm512_load_si512(w);
       const __m512i vbb89ABCDEFx01234567 = _mm512_load_si512((const int8_t*) w + 64);
-      const __m512i vbu01234567x01234567 = _mm512_xor_si512(vbb01234567x01234567, vkernel_sign_mask2);  // convert int4 to uint4
-      const __m512i vbu89ABCDEFx01234567 = _mm512_xor_si512(vbb89ABCDEFx01234567, vkernel_sign_mask2);
-      const __m512i vbs01234567x89ABCDEF = _mm512_srli_epi32(vbu01234567x01234567, 4);
-      const __m512i vbs89ABCDEFx89ABCDEF = _mm512_srli_epi32(vbu89ABCDEFx01234567, 4);
-      const __m512i vb01234567x01234567 = _mm512_and_si512(vbu01234567x01234567, vvalue_mask);
-      const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbu89ABCDEFx01234567, vvalue_mask);
-      const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbs01234567x89ABCDEF, vvalue_mask);
-      const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbs89ABCDEFx89ABCDEF, vvalue_mask);
+      const __m512i vbs01234567x89ABCDEF = _mm512_srli_epi32(vbb01234567x01234567, 4);
+      const __m512i vbs89ABCDEFx89ABCDEF = _mm512_srli_epi32(vbb89ABCDEFx01234567, 4);
+      const __m512i vb01234567x01234567 = _mm512_and_si512(vbb01234567x01234567, vmask);
+      const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbb89ABCDEFx01234567, vmask);
+      const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbs01234567x89ABCDEF, vmask);
+      const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbs89ABCDEFx89ABCDEF, vmask);
 
       vacc0x01234567 = _mm512_dpbusd_epi32_madd(vacc0x01234567, va0x01234567, vb01234567x01234567);
       vacc0x89ABCDEF = _mm512_dpbusd_epi32_madd(vacc0x89ABCDEF, va0x01234567, vb89ABCDEFx01234567);
@@ -1849,8 +1848,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_8x16c8__avx512skx_madd_prfm(
 
       const __m512i vbb01234567x01234567 = _mm512_load_si512(w);
       const __m512i vbb89ABCDEFx01234567 = _mm512_load_si512((const int8_t*) w + 64);
-      const __m512i vb01234567x01234567 = _mm512_xor_si512(vbb01234567x01234567, vkernel_sign_mask1);  // convert int4 to uint4
-      const __m512i vb89ABCDEFx01234567 = _mm512_xor_si512(vbb89ABCDEFx01234567, vkernel_sign_mask1);
+      const __m512i vb01234567x01234567 = _mm512_and_si512(vbb01234567x01234567, vmask);
+      const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbb89ABCDEFx01234567, vmask);
 
       vacc0x01234567 = _mm512_dpbusd_epi32_madd(vacc0x01234567, va0x01234567, vb01234567x01234567);
       vacc0x89ABCDEF = _mm512_dpbusd_epi32_madd(vacc0x89ABCDEF, va0x01234567, vb89ABCDEFx01234567);
@@ -7844,5 +7843,170 @@ void xnn_x8_lut_ukernel__avx512skx_vpshufb_u64(
     vy = _mm512_xor_si512(vy, _mm512_shuffle_epi8(vtableF, vx));
 
     _mm512_mask_storeu_epi8(output, vmask, vy);
+  }
+}
+
+void xnn_qs16_vmul_minmax_fp32_ukernel__avx512bw_u32(
+    size_t batch,
+    const int16_t* input_a,
+    const int16_t* input_b,
+    int16_t* output,
+    const union xnn_qs16_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
+  assert(input_b != NULL);
+  assert(input_a != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s16 == 32);
+
+  xnn_simd_s32_t vzero_point_a = xnn_set1_s32(params->qs16_scalar.a_zero_point);
+  xnn_simd_s32_t vzero_point_b = xnn_set1_s32(params->qs16_scalar.b_zero_point);
+  xnn_simd_s32_t vzero_point_output = xnn_set1_s32(params->qs16_scalar.output_zero_point);
+
+  xnn_simd_f32_t vscale = xnn_set1_f32(params->qs16_scalar.scale);
+  xnn_simd_s16_t voutput_min = xnn_set1_s16(params->qs16_scalar.output_min);
+  xnn_simd_s16_t voutput_max = xnn_set1_s16(params->qs16_scalar.output_max);
+
+  for (; batch >= xnn_simd_bytes_s16; batch -= xnn_simd_bytes_s16) {
+    xnn_simd_s16_t vin1 = xnn_loadu_s16(input_a);
+    input_a += xnn_simd_size_s16;
+
+    xnn_simd_s16_t vin2 = xnn_loadu_s16(input_b);
+    input_b += xnn_simd_size_s16;
+
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
+    vin1_low = xnn_sub_s32(vin1_low, vzero_point_a);
+    vin1_high = xnn_sub_s32(vin1_high, vzero_point_a);
+
+    xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+    xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
+    vin2_low = xnn_sub_s32(vin2_low, vzero_point_b);
+    vin2_high = xnn_sub_s32(vin2_high, vzero_point_b);
+
+    xnn_simd_s32_t vy_s32_low = xnn_mul_s32(vin1_low, vin2_low);
+    xnn_simd_s32_t vy_s32_high = xnn_mul_s32(vin1_high, vin2_high);
+
+    xnn_simd_f32_t vy_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_low), vscale);
+    xnn_simd_f32_t vy_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_high), vscale);
+
+    vy_s32_low = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled), vzero_point_output);
+    vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
+
+    xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
+    vy = xnn_max_s16(vy, voutput_min);
+    vy = xnn_min_s16(vy, voutput_max);
+
+    xnn_storeu_s16(output, vy);
+    output += xnn_simd_size_s16;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    xnn_simd_s16_t vin1 = xnn_load_tail_s16(input_a, batch >> XNN_LOG2_SIZEOF_INT16_T);
+
+    xnn_simd_s16_t vin2 = xnn_load_tail_s16(input_b, batch >> XNN_LOG2_SIZEOF_INT16_T);
+
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
+    vin1_low = xnn_sub_s32(vin1_low, vzero_point_a);
+    vin1_high = xnn_sub_s32(vin1_high, vzero_point_a);
+
+    xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+    xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
+    vin2_low = xnn_sub_s32(vin2_low, vzero_point_b);
+    vin2_high = xnn_sub_s32(vin2_high, vzero_point_b);
+
+    xnn_simd_s32_t vy_s32_low = xnn_mul_s32(vin1_low, vin2_low);
+    xnn_simd_s32_t vy_s32_high = xnn_mul_s32(vin1_high, vin2_high);
+
+    xnn_simd_f32_t vy_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_low), vscale);
+    xnn_simd_f32_t vy_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_high), vscale);
+
+    vy_s32_low = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled), vzero_point_output);
+    vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
+    
+    xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
+    vy = xnn_max_s16(vy, voutput_min);
+    vy = xnn_min_s16(vy, voutput_max);
+
+    xnn_store_tail_s16(output, vy, batch >> XNN_LOG2_SIZEOF_INT16_T);
+  }
+}
+
+void xnn_qs16_vmulc_minmax_fp32_ukernel__avx512bw_u32(
+    size_t batch,
+    const int16_t* input_a,
+    const int16_t* input_b,
+    int16_t* output,
+    const union xnn_qs16_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
+  assert(input_b != NULL);
+  assert(input_a != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s16 == 32);
+
+  xnn_simd_s32_t vzero_point_a = xnn_set1_s32(params->qs16_scalar.a_zero_point);
+  xnn_simd_s32_t vzero_point_b = xnn_set1_s32(params->qs16_scalar.b_zero_point);
+  xnn_simd_s32_t vzero_point_output = xnn_set1_s32(params->qs16_scalar.output_zero_point);
+
+  xnn_simd_f32_t vscale = xnn_set1_f32(params->qs16_scalar.scale);
+  xnn_simd_s16_t voutput_min = xnn_set1_s16(params->qs16_scalar.output_min);
+  xnn_simd_s16_t voutput_max = xnn_set1_s16(params->qs16_scalar.output_max);
+
+  xnn_simd_s16_t vin2 = xnn_set1_s16(*input_b);
+  xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+  xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
+  vin2_low = xnn_sub_s32(vin2_low, vzero_point_b);
+  vin2_high = xnn_sub_s32(vin2_high, vzero_point_b);
+
+  for (; batch >= xnn_simd_bytes_s16; batch -= xnn_simd_bytes_s16) {
+    xnn_simd_s16_t vin1 = xnn_loadu_s16(input_a);
+    input_a += xnn_simd_size_s16;
+
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
+    vin1_low = xnn_sub_s32(vin1_low, vzero_point_a);
+    vin1_high = xnn_sub_s32(vin1_high, vzero_point_a);
+
+    xnn_simd_s32_t vy_s32_low = xnn_mul_s32(vin1_low, vin2_low);
+    xnn_simd_s32_t vy_s32_high = xnn_mul_s32(vin1_high, vin2_high);
+
+    xnn_simd_f32_t vy_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_low), vscale);
+    xnn_simd_f32_t vy_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_high), vscale);
+
+    vy_s32_low = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled), vzero_point_output);
+    vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
+
+    xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
+    vy = xnn_max_s16(vy, voutput_min);
+    vy = xnn_min_s16(vy, voutput_max);
+
+    xnn_storeu_s16(output, vy);
+    output += xnn_simd_size_s16;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    xnn_simd_s16_t vin1 = xnn_load_tail_s16(input_a, batch >> XNN_LOG2_SIZEOF_INT16_T);
+
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
+    vin1_low = xnn_sub_s32(vin1_low, vzero_point_a);
+    vin1_high = xnn_sub_s32(vin1_high, vzero_point_a);
+
+    xnn_simd_s32_t vy_s32_low = xnn_mul_s32(vin1_low, vin2_low);
+    xnn_simd_s32_t vy_s32_high = xnn_mul_s32(vin1_high, vin2_high);
+
+    xnn_simd_f32_t vy_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_low), vscale);
+    xnn_simd_f32_t vy_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_high), vscale);
+
+    vy_s32_low = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled), vzero_point_output);
+    vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
+    
+    xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
+    vy = xnn_max_s16(vy, voutput_min);
+    vy = xnn_min_s16(vy, voutput_max);
+
+    xnn_store_tail_s16(output, vy, batch >> XNN_LOG2_SIZEOF_INT16_T);
   }
 }

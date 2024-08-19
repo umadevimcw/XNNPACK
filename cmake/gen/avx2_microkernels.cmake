@@ -337,13 +337,29 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-2x8c8-minmax-avx2.c
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-3x8c8-minmax-avx2.c
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-4x8c8-minmax-avx2.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx2-madd-prfm.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx2-madd.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx2.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx2-madd-prfm.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx2-madd.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx2.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avx2-madd-prfm.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avx2-madd.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avx2.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx2-madd-prfm.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx2-madd.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx2.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avx2-madd-prfm.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avx2-madd.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avx2.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avx2-madd-prfm.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avx2-madd.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avx2.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avx2-madd-prfm.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avx2-madd.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avx2.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avx2-madd-prfm.c
+  src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avx2-madd.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avx2.c
   src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c8-minmax-avx2.c
   src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c8-minmax-avx2.c
@@ -518,6 +534,8 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/qs8-vlrelu/gen/qs8-vlrelu-avx2-u16.c
   src/qs8-vlrelu/gen/qs8-vlrelu-avx2-u32.c
   src/qs8-vlrelu/gen/qs8-vlrelu-avx2-u64.c
+  src/qs16-vmul/gen/qs16-vmul-minmax-avx2.c
+  src/qs16-vmul/gen/qs16-vmulc-minmax-avx2.c
   src/qu8-dwconv/gen/qu8-dwconv-5f5m5l8c8s8r-minmax-fp32-avx2-mul32.c
   src/qu8-dwconv/gen/qu8-dwconv-5f5m5l16c8s8r-minmax-fp32-avx2-mul32.c
   src/qu8-dwconv/gen/qu8-dwconv-5f5m5l32c8s8r-minmax-fp32-avx2-mul32.c

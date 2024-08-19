@@ -3653,7 +3653,7 @@ void xnn_f32_rdsum_ukernel_7p7x__avx_c32(
     size_t input_stride,
     const float* zero,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -3661,6 +3661,8 @@ void xnn_f32_rdsum_ukernel_7p7x__avx_c32(
   assert(output != NULL);
 
   const __m256 vscale = _mm256_set1_ps(params->avx.scale);
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 32; channels -= 32) {
@@ -3765,9 +3767,17 @@ void xnn_f32_rdsum_ukernel_7p7x__avx_c32(
       i6 = (const float*) ((uintptr_t) i6 + input_increment);
     }
     vacc0 = _mm256_mul_ps(vacc0, vscale);
+    vacc0 = _mm256_max_ps(vacc0, vmin);
+    vacc0 = _mm256_min_ps(vacc0, vmax);
     vacc1 = _mm256_mul_ps(vacc1, vscale);
+    vacc1 = _mm256_max_ps(vacc1, vmin);
+    vacc1 = _mm256_min_ps(vacc1, vmax);
     vacc2 = _mm256_mul_ps(vacc2, vscale);
+    vacc2 = _mm256_max_ps(vacc2, vmin);
+    vacc2 = _mm256_min_ps(vacc2, vmax);
     vacc3 = _mm256_mul_ps(vacc3, vscale);
+    vacc3 = _mm256_max_ps(vacc3, vmin);
+    vacc3 = _mm256_min_ps(vacc3, vmax);
 
     const float* o = output;
     __m256 vo0 = _mm256_loadu_ps(o); o += 8;
@@ -3853,6 +3863,8 @@ void xnn_f32_rdsum_ukernel_7p7x__avx_c32(
     }
     for (size_t i = 0; i < num_chunks; ++i) {
       vacc[i] = _mm256_mul_ps(vacc[i], vscale);
+      vacc[i] = _mm256_max_ps(vacc[i], vmin);
+      vacc[i] = _mm256_min_ps(vacc[i], vmax);
     }
 
     __m256 vo[4];
@@ -4014,7 +4026,7 @@ void xnn_f32_rsum_ukernel__avx_u32_acc4(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -4057,6 +4069,8 @@ void xnn_f32_rsum_ukernel__avx_u32_acc4(
   vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
   vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->avx.scale));
+  vacc = _mm_max_ss(vacc, _mm_load_ss(&params->avx.min));
+  vacc = _mm_min_ss(vacc, _mm_load_ss(&params->avx.max));
   *output += _mm_cvtss_f32(vacc);
 }
 
@@ -16214,9 +16228,10 @@ void xnn_x32_transposec_ukernel__8x8_reuse_multi_avx(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
+  static const int32_t mask_table[15] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   assert(block_width == 1 || output_stride >= block_height * sizeof(float));
   assert(block_height == 1 || input_stride >= block_width * sizeof(float));
 
@@ -16240,7 +16255,7 @@ void xnn_x32_transposec_ukernel__8x8_reuse_multi_avx(
     float* o7 = (float*) (block_width < 8 ? o0 : (float*) ((uintptr_t) o6 + output_stride));
     const size_t rem = min(block_width - 1, 7);
 
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[rem ^ 7]));
+    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[rem ^ 7]));
 
     size_t bh = block_height;
     for (; bh >= 8; bh -= 8) {
@@ -16450,9 +16465,10 @@ void xnn_x64_transposec_ukernel__4x4_reuse_multi_avx(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x64_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
+  static const int64_t mask_table[7] = {-1, -1, -1, -1, 0, 0, 0};
+
   assert(block_width == 1 || output_stride >= block_height * sizeof(double));
   assert(block_height == 1 || input_stride >= block_width * sizeof(double));
 
@@ -16472,7 +16488,7 @@ void xnn_x64_transposec_ukernel__4x4_reuse_multi_avx(
     double* o3 = (double*) (block_width < 4 ? o0 : (double*) ((uintptr_t) o2 + output_stride));
     const size_t rem = min(block_width - 1, 3);
 
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[rem ^ 3]));
+    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[rem ^ 3]));
 
     size_t bh = block_height;
     for (; bh >= 4; bh -= 4) {

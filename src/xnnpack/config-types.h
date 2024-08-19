@@ -29,13 +29,6 @@ struct xnn_transpose_subconfig {
     xnn_transposec_ukernel_fn const_size_ukernel;
     xnn_transposev_ukernel_fn variable_size_ukernel;
   };
-  union {
-    xnn_init_x8_transpose_params_fn x8;
-    xnn_init_x16_transpose_params_fn x16;
-    xnn_init_x24_transpose_params_fn x24;
-    xnn_init_x32_transpose_params_fn x32;
-    xnn_init_x64_transpose_params_fn x64;
-  } init;
   // Maximum number of elements to process per ukernel call.
   size_t tile_size;
 };
@@ -80,6 +73,7 @@ struct xnn_binary_elementwise_config {
     xnn_init_qs8_mul_minmax_params_fn qs8_mul;
     xnn_init_qu8_add_minmax_params_fn qu8_add;
     xnn_init_qu8_mul_minmax_params_fn qu8_mul;
+    xnn_init_qs16_mul_minmax_params_fn qs16_mul;
     xnn_init_s32_default_params_fn s32_default;
   } init;
 };
@@ -141,6 +135,7 @@ struct xnn_reduce_config {
     xnn_init_f16_default_params_fn f16_default;
     xnn_init_f32_default_params_fn f32_default;
     xnn_init_f32_scale_params_fn f32_scale;
+    xnn_init_f32_scaleminmax_params_fn f32_scaleminmax;
   } init;
   // Number of elements in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of

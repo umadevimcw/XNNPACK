@@ -39,6 +39,7 @@
 #include "xnnpack/raddstoreexpminusmax.h"
 #include "xnnpack/reduce.h"
 #include "xnnpack/simd/f32-neon.h"
+#include "xnnpack/simd/s16-neon.h"
 #include "xnnpack/simd/s32-neon.h"
 #include "xnnpack/spmm.h"
 #include "xnnpack/transpose.h"
@@ -8048,7 +8049,7 @@ void xnn_f32_rdsum_ukernel_7p7x__neon_c16(
     size_t input_stride,
     const float* zero,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -8056,6 +8057,8 @@ void xnn_f32_rdsum_ukernel_7p7x__neon_c16(
   assert(output != NULL);
 
   const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
+  const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
+  const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 16; channels -= 16) {
@@ -8160,9 +8163,17 @@ void xnn_f32_rdsum_ukernel_7p7x__neon_c16(
       i6 = (const float*) ((uintptr_t) i6 + input_increment);
     }
     vacc0 = vmulq_f32(vacc0, vscale);
+    vacc0 = vmaxq_f32(vacc0, vmin);
+    vacc0 = vminq_f32(vacc0, vmax);
     vacc1 = vmulq_f32(vacc1, vscale);
+    vacc1 = vmaxq_f32(vacc1, vmin);
+    vacc1 = vminq_f32(vacc1, vmax);
     vacc2 = vmulq_f32(vacc2, vscale);
+    vacc2 = vmaxq_f32(vacc2, vmin);
+    vacc2 = vminq_f32(vacc2, vmax);
     vacc3 = vmulq_f32(vacc3, vscale);
+    vacc3 = vmaxq_f32(vacc3, vmin);
+    vacc3 = vminq_f32(vacc3, vmax);
 
     const float* o = output;
     float32x4_t vo0 = vld1q_f32(o); o += 4;
@@ -8234,6 +8245,8 @@ void xnn_f32_rdsum_ukernel_7p7x__neon_c16(
     }
     for (int i = 0; i < (channels + 4) >> 2; ++i) {
       vacc[i] = vmulq_f32(vacc[i], vscale);
+      vacc[i] = vmaxq_f32(vacc[i], vmin);
+      vacc[i] = vminq_f32(vacc[i], vmax);
     }
 
     float32x4_t vo[4];
@@ -8373,7 +8386,7 @@ void xnn_f32_rsum_ukernel__neon_u16_acc4(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -8403,6 +8416,8 @@ void xnn_f32_rsum_ukernel__neon_u16_acc4(
     vacc0 = vaddq_f32(vacc0, vt);
   }
   const float32x2_t vscale = vld1_dup_f32(&params->scalar.scale);
+  const float32x2_t vmin = vld1_dup_f32(&params->scalar.min);
+  const float32x2_t vmax = vld1_dup_f32(&params->scalar.max);
   float32x2_t vacc = vadd_f32(vget_low_f32(vacc0), vget_high_f32(vacc0));
   if XNN_UNLIKELY(batch & (2 * sizeof(float))) {
     const float32x2_t vt = vld1_f32(input); input += 2;
@@ -8414,6 +8429,8 @@ void xnn_f32_rsum_ukernel__neon_u16_acc4(
     vacc = vadd_f32(vacc, vt);
   }
   vacc = vmul_f32(vacc, vscale);
+  vacc = vmax_f32(vacc, vmin);
+  vacc = vmin_f32(vacc, vmax);
   *output += vget_lane_f32(vacc, 0);
 }
 
@@ -26862,8 +26879,7 @@ void xnn_x16_transposec_ukernel__8x8_reuse_dec_zip_neon(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x16_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint16_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint16_t));
@@ -27125,9 +27141,11 @@ void xnn_x24_transposec_ukernel__2x2_neon_tbl64(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x24_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
+  static const uint8_t pos0[8] = {0, 1, 2, 8, 9, 10, 0, 0};
+  static const uint8_t pos1[8] = {3, 4, 5, 11, 12, 13, 0, 0};
+
   assert(output_stride >= block_height * 3);
   assert(input_stride >= block_width * 3);
 
@@ -27146,8 +27164,8 @@ void xnn_x24_transposec_ukernel__2x2_neon_tbl64(
   uint8_t* o0 = (uint8_t*) output;
   uint8_t* o1 = (uint8_t*) ((uintptr_t) o0 + output_stride);
 
-  const uint8x8_t vperm0 = vld1_u8(params->neon_tbl64.pos0);
-  const uint8x8_t vperm1 = vld1_u8(params->neon_tbl64.pos1);
+  const uint8x8_t vperm0 = vld1_u8(pos0);
+  const uint8x8_t vperm1 = vld1_u8(pos1);
   do {
     if XNN_UNPREDICTABLE(block_width < 2) {
       o1 = o0;
@@ -28331,8 +28349,7 @@ void xnn_x32_transposec_ukernel__4x4_reuse_dec_zip_neon(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint32_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint32_t));
@@ -28699,8 +28716,7 @@ void xnn_x64_transposec_ukernel__2x2_multi_dec_zip_neon(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x64_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint64_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint64_t));
@@ -28787,8 +28803,7 @@ void xnn_x64_transposec_ukernel__2x2_reuse_dec_zip_neon(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x64_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint64_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint64_t));
@@ -28872,8 +28887,7 @@ void xnn_x8_transposec_ukernel__16x16_reuse_dec_zip_neon(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x8_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint8_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint8_t));
@@ -30637,6 +30651,171 @@ void xnn_f32_vsqr_ukernel__neon_u8(
     const xnn_simd_f32_t vy = xnn_mul_f32(vx, vx);
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
+  }
+}
+
+void xnn_qs16_vmul_minmax_fp32_ukernel__neon_u8(
+    size_t batch,
+    const int16_t* input_a,
+    const int16_t* input_b,
+    int16_t* output,
+    const union xnn_qs16_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
+  assert(input_b != NULL);
+  assert(input_a != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s16 == 8);
+
+  xnn_simd_s32_t vzero_point_a = xnn_set1_s32(params->qs16_scalar.a_zero_point);
+  xnn_simd_s32_t vzero_point_b = xnn_set1_s32(params->qs16_scalar.b_zero_point);
+  xnn_simd_s32_t vzero_point_output = xnn_set1_s32(params->qs16_scalar.output_zero_point);
+
+  xnn_simd_f32_t vscale = xnn_set1_f32(params->qs16_scalar.scale);
+  xnn_simd_s16_t voutput_min = xnn_set1_s16(params->qs16_scalar.output_min);
+  xnn_simd_s16_t voutput_max = xnn_set1_s16(params->qs16_scalar.output_max);
+
+  for (; batch >= xnn_simd_bytes_s16; batch -= xnn_simd_bytes_s16) {
+    xnn_simd_s16_t vin1 = xnn_loadu_s16(input_a);
+    input_a += xnn_simd_size_s16;
+
+    xnn_simd_s16_t vin2 = xnn_loadu_s16(input_b);
+    input_b += xnn_simd_size_s16;
+
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
+    vin1_low = xnn_sub_s32(vin1_low, vzero_point_a);
+    vin1_high = xnn_sub_s32(vin1_high, vzero_point_a);
+
+    xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+    xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
+    vin2_low = xnn_sub_s32(vin2_low, vzero_point_b);
+    vin2_high = xnn_sub_s32(vin2_high, vzero_point_b);
+
+    xnn_simd_s32_t vy_s32_low = xnn_mul_s32(vin1_low, vin2_low);
+    xnn_simd_s32_t vy_s32_high = xnn_mul_s32(vin1_high, vin2_high);
+
+    xnn_simd_f32_t vy_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_low), vscale);
+    xnn_simd_f32_t vy_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_high), vscale);
+
+    vy_s32_low = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled), vzero_point_output);
+    vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
+
+    xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
+    vy = xnn_max_s16(vy, voutput_min);
+    vy = xnn_min_s16(vy, voutput_max);
+
+    xnn_storeu_s16(output, vy);
+    output += xnn_simd_size_s16;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    xnn_simd_s16_t vin1 = xnn_load_tail_s16(input_a, batch >> XNN_LOG2_SIZEOF_INT16_T);
+
+    xnn_simd_s16_t vin2 = xnn_load_tail_s16(input_b, batch >> XNN_LOG2_SIZEOF_INT16_T);
+
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
+    vin1_low = xnn_sub_s32(vin1_low, vzero_point_a);
+    vin1_high = xnn_sub_s32(vin1_high, vzero_point_a);
+
+    xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+    xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
+    vin2_low = xnn_sub_s32(vin2_low, vzero_point_b);
+    vin2_high = xnn_sub_s32(vin2_high, vzero_point_b);
+
+    xnn_simd_s32_t vy_s32_low = xnn_mul_s32(vin1_low, vin2_low);
+    xnn_simd_s32_t vy_s32_high = xnn_mul_s32(vin1_high, vin2_high);
+
+    xnn_simd_f32_t vy_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_low), vscale);
+    xnn_simd_f32_t vy_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_high), vscale);
+
+    vy_s32_low = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled), vzero_point_output);
+    vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
+    
+    xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
+    vy = xnn_max_s16(vy, voutput_min);
+    vy = xnn_min_s16(vy, voutput_max);
+
+    xnn_store_tail_s16(output, vy, batch >> XNN_LOG2_SIZEOF_INT16_T);
+  }
+}
+
+void xnn_qs16_vmulc_minmax_fp32_ukernel__neon_u8(
+    size_t batch,
+    const int16_t* input_a,
+    const int16_t* input_b,
+    int16_t* output,
+    const union xnn_qs16_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
+  assert(input_b != NULL);
+  assert(input_a != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s16 == 8);
+
+  xnn_simd_s32_t vzero_point_a = xnn_set1_s32(params->qs16_scalar.a_zero_point);
+  xnn_simd_s32_t vzero_point_b = xnn_set1_s32(params->qs16_scalar.b_zero_point);
+  xnn_simd_s32_t vzero_point_output = xnn_set1_s32(params->qs16_scalar.output_zero_point);
+
+  xnn_simd_f32_t vscale = xnn_set1_f32(params->qs16_scalar.scale);
+  xnn_simd_s16_t voutput_min = xnn_set1_s16(params->qs16_scalar.output_min);
+  xnn_simd_s16_t voutput_max = xnn_set1_s16(params->qs16_scalar.output_max);
+
+  xnn_simd_s16_t vin2 = xnn_set1_s16(*input_b);
+  xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+  xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
+  vin2_low = xnn_sub_s32(vin2_low, vzero_point_b);
+  vin2_high = xnn_sub_s32(vin2_high, vzero_point_b);
+
+  for (; batch >= xnn_simd_bytes_s16; batch -= xnn_simd_bytes_s16) {
+    xnn_simd_s16_t vin1 = xnn_loadu_s16(input_a);
+    input_a += xnn_simd_size_s16;
+
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
+    vin1_low = xnn_sub_s32(vin1_low, vzero_point_a);
+    vin1_high = xnn_sub_s32(vin1_high, vzero_point_a);
+
+    xnn_simd_s32_t vy_s32_low = xnn_mul_s32(vin1_low, vin2_low);
+    xnn_simd_s32_t vy_s32_high = xnn_mul_s32(vin1_high, vin2_high);
+
+    xnn_simd_f32_t vy_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_low), vscale);
+    xnn_simd_f32_t vy_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_high), vscale);
+
+    vy_s32_low = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled), vzero_point_output);
+    vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
+
+    xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
+    vy = xnn_max_s16(vy, voutput_min);
+    vy = xnn_min_s16(vy, voutput_max);
+
+    xnn_storeu_s16(output, vy);
+    output += xnn_simd_size_s16;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    xnn_simd_s16_t vin1 = xnn_load_tail_s16(input_a, batch >> XNN_LOG2_SIZEOF_INT16_T);
+
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
+    vin1_low = xnn_sub_s32(vin1_low, vzero_point_a);
+    vin1_high = xnn_sub_s32(vin1_high, vzero_point_a);
+
+    xnn_simd_s32_t vy_s32_low = xnn_mul_s32(vin1_low, vin2_low);
+    xnn_simd_s32_t vy_s32_high = xnn_mul_s32(vin1_high, vin2_high);
+
+    xnn_simd_f32_t vy_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_low), vscale);
+    xnn_simd_f32_t vy_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vy_s32_high), vscale);
+
+    vy_s32_low = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled), vzero_point_output);
+    vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
+    
+    xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
+    vy = xnn_max_s16(vy, voutput_min);
+    vy = xnn_min_s16(vy, voutput_max);
+
+    xnn_store_tail_s16(output, vy, batch >> XNN_LOG2_SIZEOF_INT16_T);
   }
 }
 

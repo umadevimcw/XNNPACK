@@ -86,12 +86,6 @@ struct transpose_context {
     xnn_transposec_ukernel_fn const_size_ukernel;
     xnn_transposev_ukernel_fn variable_size_ukernel;
   };
-  union {
-    union xnn_x8_transpose_params x8_params;
-    union xnn_x16_transpose_params x16_params;
-    union xnn_x24_transpose_params x24_params;
-    union xnn_x32_transpose_params x32_params;
-  } params;
   size_t input_stride[XNN_MAX_TENSOR_DIMS];
   size_t output_stride[XNN_MAX_TENSOR_DIMS];
 };
@@ -1460,6 +1454,7 @@ struct reduce_context {
     union xnn_f32_default_params f32_default;
     union xnn_f16_f32acc_scale_params scale_params;
     union xnn_f32_scale_params f32_scale;
+    union xnn_f32_scaleminmax_params f32_scaleminmax;
   } params;
   union xnn_f32_f16_cvt_params cvt_params;
 };

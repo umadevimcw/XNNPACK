@@ -107,6 +107,12 @@ union xnn_f32_scaleminmax_params {
     XNN_ALIGN(16) float min[4];
     XNN_ALIGN(16) float max[4];
   } sse;
+  struct {
+    int32_t mask_table[14];
+    float scale;
+    float min;
+    float max;
+  } avx;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
@@ -278,17 +284,15 @@ union xnn_f32_qc4w_minmax_params {
   struct {
     float min;
     float max;
-    int8_t sign_mask;         // 0x80
-    int8_t mask;              // 0xF0 or 0x0F
-    int8_t kernel_sign_mask1; // 0x08
-    int8_t kernel_sign_mask2; // 0x88
-    int64_t gfni_shl4;        // 0x01020408
+    int8_t sign_mask;   // 0x80
+    int8_t mask;        // 0xF0 or 0x0F
+    int64_t gfni_shl4;  // 0x01020408
   } avx512vnni;
   struct {
     float min;
     float max;
     int8_t sign_mask;   // 0x80
-    int8_t mask;        // 0xF0
+    int8_t mask;        // 0xF0 or 0x0F
     int64_t gfni_shl4;  // 0x01020408
   } avxvnni;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1744,6 +1748,17 @@ union xnn_qs8_f32_cvt_params {
     XNN_ALIGN(8) float scale[2];
   } wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+};
+
+union xnn_qs16_mul_minmax_params {
+  struct {
+    int16_t a_zero_point;
+    int16_t b_zero_point;
+    float scale;
+    int16_t output_zero_point;
+    int16_t output_min;
+    int16_t output_max;
+  } qs16_scalar;
 };
 
 union xnn_qu8_cvt_params {
@@ -3206,80 +3221,20 @@ struct jit_gemm_params {
   const struct xnn_post_operation* post_operations;
 };
 
-union xnn_x8_transpose_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    uint32_t mask_table[15];
-  } avx2;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-};
-
-union xnn_x16_transpose_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    uint32_t mask_table[15];
-  } avx2;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-};
-
-union xnn_x24_transpose_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
-    uint8_t pos0[16];  // used by tbl kernels
-    uint8_t pos1[16];  // used by tbl kernels
-    uint8_t pos2[16];  // used by tbl kernels
-    uint8_t pos3[16];  // used by tbl kernels
-  } neon_tbl128;
-  struct {
-    uint8_t pos0[8];  // used by tbl kernels
-    uint8_t pos1[8];  // used by tbl kernels
-  } neon_tbl64;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-        XNN_ALIGN(16) uint8_t pos0[16];
-        XNN_ALIGN(16) uint8_t pos1[16];
-        XNN_ALIGN(16) uint8_t pos2[16];
-        XNN_ALIGN(16) uint8_t pos3[16];
-        XNN_ALIGN(16) uint8_t pos4[16];
-        XNN_ALIGN(16) uint8_t pos5[16];
-  } ssse3;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-};
-
-union xnn_x32_transpose_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
-    uint8_t pos0[16];  // used by tbl kernels
-    uint8_t pos1[16];  // used by tbl kernels
-    uint8_t pos2[16];  // used by tbl kernels
-    uint8_t pos3[16];  // used by tbl kernels
-  } neon_tbl128;
-  struct {
-    uint8_t pos0[8];  // used by tbl kernels
-    uint8_t pos1[8];  // used by tbl kernels
-  } neon_tbl64;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    uint32_t mask_table[15];
-  } avx;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-};
-
-union xnn_x64_transpose_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    uint64_t mask_table[7];
-  } avx;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-};
-
 union xnn_x32_packb_params {
   char _;  // Dummy member variable to comply with the C standard
 };
+
+struct subconvolution_params {
+  void* weights;
+  size_t w_stride;
+  const void** indirection_buffer;
+  void* output;
+  size_t slice_width;
+  size_t slice_height;
+  size_t indirection_y_stride;
+  size_t indirection_x_stride;
+  // scaled_kernel_size := kernel_size * mr * sizeof(void*).
+  size_t scaled_kernel_size;
+};
+
