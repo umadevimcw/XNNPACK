@@ -2186,6 +2186,12 @@ typedef void (*xnn_qs8_vadd_minmax_ukernel_fn)(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_qs16_vrem_minmax_ukernel_fn)(
+    size_t batch, const int16_t* input_x, const int16_t* input_y,
+    int16_t* output,
+    const union xnn_qs16_rem_minmax_params
+        params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_qu8_vadd_minmax_ukernel_fn)(
     size_t batch,
     const uint8_t* input_x,
@@ -2690,6 +2696,12 @@ typedef size_t (*xnn_init_qu8_mul_minmax_params_fn)(
   float product_output_scale,
   uint8_t output_min,
   uint8_t output_max);
+
+typedef size_t (*xnn_init_qs16_rem_minmax_params_fn)(
+    union xnn_qs16_rem_minmax_params params[XNN_MIN_ELEMENTS(1)],
+    int16_t a_zero_point, int16_t b_zero_point, float a_scale, float b_scale,
+    float y_scale, int16_t output_zero_point, int16_t output_min,
+    int16_t output_max);
 
 typedef size_t (*xnn_init_bf16_abs_params_fn)(
   union xnn_bf16_abs_params params[XNN_MIN_ELEMENTS(1)]);

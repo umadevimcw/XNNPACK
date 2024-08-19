@@ -184,6 +184,9 @@ class VBinaryCMicrokernelTester {
   void Test(xnn_qs16_vbinary_ukernel_fn vbinary, OpType op_type,
             xnn_init_qs16_mul_minmax_params_fn init_params, xnn_qs16_requantize_fn requantize) const;
 
+  void Test(xnn_qs16_vrem_minmax_ukernel_fn vbinary, OpType op_type,
+            xnn_init_qs16_rem_minmax_params_fn init_params) const;
+
   void Test(xnn_s32_vbinary_ukernel_fn vbinaryc, OpType op_type,
             xnn_init_s32_default_params_fn init_params = nullptr) const;
  private:

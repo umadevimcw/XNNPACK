@@ -903,3 +903,97 @@ void VBinaryCMicrokernelTester::Test(
     }
   }
 }
+
+void VBinaryCMicrokernelTester::Test(
+    xnn_qs16_vrem_minmax_ukernel_fn vbinary, OpType op_type,
+    xnn_init_qs16_rem_minmax_params_fn init_params) const {
+  xnnpack::ReplicableRandomDevice rng;
+  std::uniform_int_distribution<int32_t> s16dist(
+      std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max());
+
+  std::vector<int16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
+  int16_t b = s16dist(rng);
+  std::vector<int16_t> y(batch_size() +
+                         (inplace() ? XNN_EXTRA_BYTES / sizeof(int16_t) : 0));
+  std::vector<int16_t> y_ref(batch_size());
+  std::vector<float> y_fp(batch_size());
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(a.begin(), a.end(), [&]() { return s16dist(rng); });
+    if (inplace()) {
+      std::generate(y.begin(), y.end(), [&]() { return s16dist(rng); });
+    } else {
+      std::fill(y.begin(), y.end(), 0xA5);
+    }
+    const int16_t* a_data = inplace() ? y.data() : a.data();
+
+    // Prepare parameters.
+    xnn_qs16_rem_minmax_params params;
+    if (init_params != nullptr) {
+      init_params(&params, a_zero_point_s16(), b_zero_point_s16(), a_scale(),
+                  b_scale(), 1 / y_scale(), y_zero_point_s16(), qmin_s16(),
+                  qmax_s16());
+    }
+
+    // Compute reference results.
+    switch (op_type) {
+      case OpType::RemC:
+        for (size_t i = 0; i < batch_size(); i++) {
+          const float a_f =
+              static_cast<float>(static_cast<int32_t>(a_data[i]) -
+                                 static_cast<int32_t>(a_zero_point_s16())) *
+              a_scale();
+          const float b_f =
+              static_cast<float>(static_cast<int32_t>(b) -
+                                 static_cast<int32_t>(b_zero_point_s16())) *
+              b_scale();
+          int32_t q = a_f / b_f;
+          float res_f = a_f - q * b_f;
+          int32_t res = static_cast<int32_t>(y_zero_point_s16()) +
+                        static_cast<int32_t>(res_f * (1 / y_scale()));
+          y_fp[i] = static_cast<float>(res);
+          y_fp[i] = std::max<float>(
+              y_fp[i], static_cast<int16_t>(static_cast<int32_t>(qmin_s16())));
+          y_fp[i] = std::min<float>(
+              y_fp[i], static_cast<int16_t>(static_cast<int32_t>(qmax_s16())));
+          y_ref[i] = xnn_qs16_requantize_rem_fp32(a_data[i], b, params,
+                                                  qmin_s16(), qmax_s16());
+        }
+        break;
+      case OpType::RRemC:
+        for (size_t i = 0; i < batch_size(); i++) {
+          const float a_f =
+              static_cast<float>(static_cast<int32_t>(a_data[i]) -
+                                 static_cast<int32_t>(a_zero_point_s16())) *
+              a_scale();
+          const float b_f =
+              static_cast<float>(static_cast<int32_t>(b) -
+                                 static_cast<int32_t>(b_zero_point_s16())) *
+              b_scale();
+          int32_t q = b_f / a_f;
+          float res_f = b_f - q * a_f;
+          int32_t res = static_cast<int32_t>(y_zero_point_s16()) +
+                        static_cast<int32_t>(res_f / y_scale());
+          y_fp[i] = static_cast<float>(res);
+          y_fp[i] = std::max<float>(
+              y_fp[i], static_cast<int16_t>(static_cast<int32_t>(qmin_s16())));
+          y_fp[i] = std::min<float>(
+              y_fp[i], static_cast<int16_t>(static_cast<int32_t>(qmax_s16())));
+          y_ref[i] = xnn_qs16_requantize_rem_fp32(b, a_data[i], params,
+                                                  qmin_s16(), qmax_s16());
+        }
+        break;
+    }
+
+    // Call optimized micro-kernel.
+    vbinary(batch_size() * sizeof(int16_t), a_data, &b, y.data(), &params);
+
+    // Verify results.
+    for (size_t i = 0; i < batch_size(); i++) {
+      // EXPECT_EQ(static_cast<int32_t>(y[i]), static_cast<int32_t>(y_ref[i]))
+      //   << "at element " << i << " / " << batch_size()<<" , "<< a_data[i]<<"
+      //   , "<<b;
+      EXPECT_NEAR(static_cast<int32_t>(y[i]), y_fp[i], 1.0f)
+          << "at element " << i << " / " << batch_size();
+    }
+  }
+}

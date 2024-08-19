@@ -80,6 +80,27 @@ static inline int16_t xnn_qs16_requantize_fp32(
   return (int16_t)scaled_input;
 }
 
+static inline int16_t xnn_qs16_requantize_rem_fp32(
+  int16_t a,
+  int16_t b,
+  union xnn_qs16_rem_minmax_params params,
+  int16_t min,
+  int16_t max)
+{
+  int32_t q = (int32_t)((float)((int32_t)a - (int32_t)params.qs16_scalar.a_zero_point) * params.qs16_scalar.a_scale 
+                 / (float)((int32_t)b - (int32_t)params.qs16_scalar.b_zero_point) * params.qs16_scalar.b_scale); 
+  float input = (float)((int32_t)a - (int32_t)params.qs16_scalar.a_zero_point) * params.qs16_scalar.a_scale - q * 
+                 (float)((int32_t)b - (int32_t)params.qs16_scalar.b_zero_point) * params.qs16_scalar.b_scale;
+  int32_t scaled_input = (int32_t)(input * params.qs16_scalar.output_scale) + (int32_t)params.qs16_scalar.output_zero_point;
+  scaled_input = (scaled_input > INT16_MAX)
+                     ? INT16_MAX
+                     : ((scaled_input < INT16_MIN) ? INT16_MIN : scaled_input);
+  scaled_input = math_max_s32(scaled_input, min);
+  scaled_input = math_min_s32(scaled_input, max);
+
+  return (int16_t)scaled_input;
+}
+
 static inline uint8_t xnn_qu8_requantize_fp32(
   int32_t input,
   float scale,

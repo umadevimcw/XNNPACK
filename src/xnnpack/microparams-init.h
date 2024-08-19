@@ -223,6 +223,14 @@ DECLARE_UPDATE_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qs8_avgpool_minmax_fp32_sc
   DECLARE_UPDATE_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qs8_avgpool_minmax_fp32_wasmsimd_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#define DECLARE_INIT_QS16_REM_MINMAX_PARAMS_FUNCTION(fn_name)       \
+  XNN_INTERNAL size_t fn_name(                                      \
+      union xnn_qs16_rem_minmax_params params[XNN_MIN_ELEMENTS(1)], \
+      int16_t a_zero_point, int16_t b_zero_point, float a_scale,    \
+      float b_scale, float output_scale, int16_t output_zero_point, \
+      int16_t output_min, int16_t output_max);
+
+  DECLARE_INIT_QS16_REM_MINMAX_PARAMS_FUNCTION(xnn_init_qs16_rem_minmax_params)
 
 #define DECLARE_INIT_QU8_AVGPOOL_PARAMS_FUNCTION(fn_name)            \
   XNN_INTERNAL size_t fn_name(                                       \

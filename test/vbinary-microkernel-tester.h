@@ -190,6 +190,9 @@ class VBinaryMicrokernelTester {
             xnn_init_qs8_mul_minmax_params_fn init_params,
             xnn_qs8_requantize_fn requantize) const;
 
+  void Test(xnn_qs16_vrem_minmax_ukernel_fn vbinary, OpType op_type,
+            xnn_init_qs16_rem_minmax_params_fn init_params = nullptr) const;
+
  private:
   size_t batch_size_{1};
   bool inplace_a_{false};

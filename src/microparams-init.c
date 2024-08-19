@@ -550,6 +550,28 @@ size_t xnn_init_qs8_conv_minmax_fp32_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+size_t xnn_init_qs16_rem_minmax_params(
+  union xnn_qs16_rem_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int16_t a_zero_point,
+  int16_t b_zero_point,
+  float a_scale,
+  float b_scale,
+  float output_scale,
+  int16_t output_zero_point,
+  int16_t output_min,
+  int16_t output_max)
+{
+  params->qs16_scalar.a_zero_point = a_zero_point;
+  params->qs16_scalar.b_zero_point = b_zero_point;
+  params->qs16_scalar.a_scale = a_scale;
+  params->qs16_scalar.b_scale = b_scale;
+  params->qs16_scalar.output_scale = output_scale;
+  params->qs16_scalar.output_zero_point = output_zero_point;
+  params->qs16_scalar.output_min = output_min;
+  params->qs16_scalar.output_max = output_max;
+  return sizeof(params->qs16_scalar);
+}
+
 size_t xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params(
   union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t kernel_zero_point,
