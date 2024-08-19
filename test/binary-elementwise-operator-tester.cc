@@ -839,6 +839,12 @@ void BinaryElementwiseOperatorTester::TestQS16() const {
                                 input1_zero_point(), input1_scale(), input2_zero_point(), input2_scale(),
                                 output_zero_point(), output_scale(), qmin(), qmax(), 0, &binary_elementwise_op));
         break;
+      case OperationType::Remainder:
+        ASSERT_EQ(
+          xnn_status_success, xnn_create_remainder_nd_qs16(
+                                input1_zero_point(), input1_scale(), input2_zero_point(), input2_scale(),
+                                output_zero_point(), output_scale(), qmin(), qmax(), 0, &binary_elementwise_op));
+        break;
       default:
         FAIL() << "Unsupported operation type";
     }
@@ -857,6 +863,17 @@ void BinaryElementwiseOperatorTester::TestQS16() const {
                 num_input2_dims(), input2_shape().data(),
                 /*threadpool=*/nullptr));
         ASSERT_EQ(xnn_status_success, xnn_setup_multiply_nd_qs16(
+                                          binary_elementwise_op, input1.data(),
+                                          input2.data(), output.data()));
+        break;
+      case OperationType::Remainder:
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_reshape_remainder_nd_qs16(
+                binary_elementwise_op, num_input1_dims(), input1_shape().data(),
+                num_input2_dims(), input2_shape().data(),
+                /*threadpool=*/nullptr));
+        ASSERT_EQ(xnn_status_success, xnn_setup_remainder_nd_qs16(
                                           binary_elementwise_op, input1.data(),
                                           input2.data(), output.data()));
         break;

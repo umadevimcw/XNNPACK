@@ -33602,6 +33602,364 @@ void xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u2(
   }
 }
 
+void xnn_qs16_vrem_minmax_ukernel__scalar_u2(
+    size_t batch,
+    const int16_t* input_a,
+    const int16_t* input_b,
+    int16_t* output,
+    const union xnn_qs16_rem_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
+  assert(input_b != NULL);
+  assert(input_a != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s16 == 1);
+
+  xnn_simd_s32_t vzero_point_a = xnn_set1_s32(params->qs16_scalar.a_zero_point);
+  xnn_simd_s32_t vzero_point_b = xnn_set1_s32(params->qs16_scalar.b_zero_point);
+  xnn_simd_s32_t vzero_point_output = xnn_set1_s32(params->qs16_scalar.output_zero_point);
+
+  xnn_simd_f32_t vscale_a = xnn_set1_f32(params->qs16_scalar.a_scale);
+  xnn_simd_f32_t vscale_b = xnn_set1_f32(params->qs16_scalar.b_scale);
+  xnn_simd_f32_t vscale_output = xnn_set1_f32(params->qs16_scalar.output_scale);
+  xnn_simd_s16_t voutput_min = xnn_set1_s16(params->qs16_scalar.output_min);
+  xnn_simd_s16_t voutput_max = xnn_set1_s16(params->qs16_scalar.output_max);
+
+  for (; batch >= 2 * sizeof(int16_t); batch -= 2 * sizeof(int16_t)) {
+    xnn_simd_s16_t vin1_0 = xnn_loadu_s16(input_a);
+    xnn_simd_s16_t vin1_1 = xnn_loadu_s16(input_a + 1 * xnn_simd_size_s16);
+    input_a += 2;
+
+    xnn_simd_s16_t vin2_0 = xnn_loadu_s16(input_b);
+    xnn_simd_s16_t vin2_1 = (xnn_loadu_s16(input_b + 1 * xnn_simd_size_s16));
+    input_b += 2;
+
+    xnn_simd_s32_t vin1_low_0 = xnn_low_cvt_s16_s32(vin1_0);
+    xnn_simd_s32_t vin1_high_0 = xnn_high_cvt_s16_s32(vin1_0);
+    vin1_low_0 = xnn_sub_s32(vin1_low_0, vzero_point_a);
+    xnn_simd_f32_t vin1_f32_low_scaled_0 = xnn_mul_f32(xnn_cvt_s32_f32(vin1_low_0), vscale_a);
+    vin1_high_0 = xnn_sub_s32(vin1_high_0, vzero_point_a);
+    xnn_simd_f32_t vin1_f32_high_scaled_0 = xnn_mul_f32(xnn_cvt_s32_f32(vin1_high_0), vscale_a);
+
+    xnn_simd_s32_t vin2_low_0 = xnn_low_cvt_s16_s32(vin2_0);
+    xnn_simd_s32_t vin2_high_0 = xnn_high_cvt_s16_s32(vin2_0);
+    vin2_low_0 = xnn_sub_s32(vin2_low_0, vzero_point_b);
+    xnn_simd_f32_t vin2_f32_low_scaled_0 = xnn_mul_f32(xnn_cvt_s32_f32(vin2_low_0), vscale_b);
+    vin2_high_0 = xnn_sub_s32(vin2_high_0, vzero_point_b);
+    xnn_simd_f32_t vin2_f32_high_scaled_0 = xnn_mul_f32(xnn_cvt_s32_f32(vin2_high_0), vscale_b);
+
+    xnn_simd_f32_t vy_f32_low_scaled_0 = xnn_mul_f32(xnn_rem_f32(vin1_f32_low_scaled_0, vin2_f32_low_scaled_0),
+                                                  vscale_output);
+    xnn_simd_f32_t vy_f32_high_scaled_0 = xnn_mul_f32(xnn_rem_f32(vin1_f32_high_scaled_0, vin2_f32_high_scaled_0),
+                                                  vscale_output);
+
+    xnn_simd_s32_t vy_s32_low_0 = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled_0), vzero_point_output);
+    xnn_simd_s32_t vy_s32_high_0 = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled_0), vzero_point_output);
+
+    xnn_simd_s16_t vy_0 = xnn_cvt_s32_s16(vy_s32_low_0, vy_s32_high_0);
+    vy_0 = xnn_max_s16(vy_0, voutput_min);
+    vy_0 = xnn_min_s16(vy_0, voutput_max);
+    xnn_simd_s32_t vin1_low_1 = xnn_low_cvt_s16_s32(vin1_1);
+    xnn_simd_s32_t vin1_high_1 = xnn_high_cvt_s16_s32(vin1_1);
+    vin1_low_1 = xnn_sub_s32(vin1_low_1, vzero_point_a);
+    xnn_simd_f32_t vin1_f32_low_scaled_1 = xnn_mul_f32(xnn_cvt_s32_f32(vin1_low_1), vscale_a);
+    vin1_high_1 = xnn_sub_s32(vin1_high_1, vzero_point_a);
+    xnn_simd_f32_t vin1_f32_high_scaled_1 = xnn_mul_f32(xnn_cvt_s32_f32(vin1_high_1), vscale_a);
+
+    xnn_simd_s32_t vin2_low_1 = xnn_low_cvt_s16_s32(vin2_1);
+    xnn_simd_s32_t vin2_high_1 = xnn_high_cvt_s16_s32(vin2_1);
+    vin2_low_1 = xnn_sub_s32(vin2_low_1, vzero_point_b);
+    xnn_simd_f32_t vin2_f32_low_scaled_1 = xnn_mul_f32(xnn_cvt_s32_f32(vin2_low_1), vscale_b);
+    vin2_high_1 = xnn_sub_s32(vin2_high_1, vzero_point_b);
+    xnn_simd_f32_t vin2_f32_high_scaled_1 = xnn_mul_f32(xnn_cvt_s32_f32(vin2_high_1), vscale_b);
+
+    xnn_simd_f32_t vy_f32_low_scaled_1 = xnn_mul_f32(xnn_rem_f32(vin1_f32_low_scaled_1, vin2_f32_low_scaled_1),
+                                                  vscale_output);
+    xnn_simd_f32_t vy_f32_high_scaled_1 = xnn_mul_f32(xnn_rem_f32(vin1_f32_high_scaled_1, vin2_f32_high_scaled_1),
+                                                  vscale_output);
+
+    xnn_simd_s32_t vy_s32_low_1 = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled_1), vzero_point_output);
+    xnn_simd_s32_t vy_s32_high_1 = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled_1), vzero_point_output);
+
+    xnn_simd_s16_t vy_1 = xnn_cvt_s32_s16(vy_s32_low_1, vy_s32_high_1);
+    vy_1 = xnn_max_s16(vy_1, voutput_min);
+    vy_1 = xnn_min_s16(vy_1, voutput_max);
+
+    xnn_storeu_s16(output, vy_0);
+    xnn_storeu_s16(output + 1 * xnn_simd_size_s16, vy_1);
+    output += 2;
+  }
+  for (; batch >= xnn_simd_bytes_s16; batch -= xnn_simd_bytes_s16) {
+    xnn_simd_s16_t vin1 = xnn_loadu_s16(input_a);
+    input_a += xnn_simd_size_s16;
+
+    xnn_simd_s16_t vin2 = xnn_loadu_s16(input_b);
+    input_b += xnn_simd_size_s16;
+
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
+    vin1_low = xnn_sub_s32(vin1_low, vzero_point_a);
+    xnn_simd_f32_t vin1_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin1_low), vscale_a);
+    vin1_high = xnn_sub_s32(vin1_high, vzero_point_a);
+    xnn_simd_f32_t vin1_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin1_high), vscale_a);
+
+    xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+    xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
+    vin2_low = xnn_sub_s32(vin2_low, vzero_point_b);
+    xnn_simd_f32_t vin2_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin2_low), vscale_b);
+    vin2_high = xnn_sub_s32(vin2_high, vzero_point_b);
+    xnn_simd_f32_t vin2_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin2_high), vscale_b);
+
+    xnn_simd_f32_t vy_f32_low_scaled = xnn_mul_f32(xnn_rem_f32(vin1_f32_low_scaled, vin2_f32_low_scaled),
+                                                  vscale_output);
+    xnn_simd_f32_t vy_f32_high_scaled = xnn_mul_f32(xnn_rem_f32(vin1_f32_high_scaled, vin2_f32_high_scaled),
+                                                  vscale_output);
+
+    xnn_simd_s32_t vy_s32_low = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled), vzero_point_output);
+    xnn_simd_s32_t vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
+
+    xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
+    vy = xnn_max_s16(vy, voutput_min);
+    vy = xnn_min_s16(vy, voutput_max);
+
+    xnn_storeu_s16(output, vy);
+    output += xnn_simd_size_s16;
+  }
+}
+
+void xnn_qs16_vremc_minmax_ukernel__scalar_u2(
+    size_t batch,
+    const int16_t* input_a,
+    const int16_t* input_b,
+    int16_t* output,
+    const union xnn_qs16_rem_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
+  assert(input_b != NULL);
+  assert(input_a != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s16 == 1);
+
+  xnn_simd_s32_t vzero_point_a = xnn_set1_s32(params->qs16_scalar.a_zero_point);
+  xnn_simd_s32_t vzero_point_b = xnn_set1_s32(params->qs16_scalar.b_zero_point);
+  xnn_simd_s32_t vzero_point_output = xnn_set1_s32(params->qs16_scalar.output_zero_point);
+
+  xnn_simd_f32_t vscale_a = xnn_set1_f32(params->qs16_scalar.a_scale);
+  xnn_simd_f32_t vscale_b = xnn_set1_f32(params->qs16_scalar.b_scale);
+  xnn_simd_f32_t vscale_output = xnn_set1_f32(params->qs16_scalar.output_scale);
+  xnn_simd_s16_t voutput_min = xnn_set1_s16(params->qs16_scalar.output_min);
+  xnn_simd_s16_t voutput_max = xnn_set1_s16(params->qs16_scalar.output_max);
+
+  xnn_simd_s16_t vin2 = xnn_set1_s16(*input_b);
+
+  for (; batch >= 2 * sizeof(int16_t); batch -= 2 * sizeof(int16_t)) {
+    xnn_simd_s16_t vin1_0 = xnn_loadu_s16(input_a);
+    xnn_simd_s16_t vin1_1 = xnn_loadu_s16(input_a + 1 * xnn_simd_size_s16);
+    input_a += 2;
+
+    xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+    xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
+    vin2_low = xnn_sub_s32(vin2_low, vzero_point_b);
+    xnn_simd_f32_t vin2_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin2_low), vscale_b);
+    vin2_high = xnn_sub_s32(vin2_high, vzero_point_b);
+    xnn_simd_f32_t vin2_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin2_high), vscale_b);
+
+    xnn_simd_s32_t vin1_low_0 = xnn_low_cvt_s16_s32(vin1_0);
+    xnn_simd_s32_t vin1_high_0 = xnn_high_cvt_s16_s32(vin1_0);
+    vin1_low_0 = xnn_sub_s32(vin1_low_0, vzero_point_a);
+    xnn_simd_f32_t vin1_f32_low_scaled_0 = xnn_mul_f32(xnn_cvt_s32_f32(vin1_low_0), vscale_a);
+    vin1_high_0 = xnn_sub_s32(vin1_high_0, vzero_point_a);
+    xnn_simd_f32_t vin1_f32_high_scaled_0 = xnn_mul_f32(xnn_cvt_s32_f32(vin1_high_0), vscale_a);
+
+
+    xnn_simd_f32_t vy_f32_low_scaled_0 = xnn_mul_f32(xnn_rem_f32(vin1_f32_low_scaled_0, vin2_f32_low_scaled),
+                                                  vscale_output);
+    xnn_simd_f32_t vy_f32_high_scaled_0 = xnn_mul_f32(xnn_rem_f32(vin1_f32_high_scaled_0, vin2_f32_high_scaled),
+                                                  vscale_output);
+
+    xnn_simd_s32_t vy_s32_low_0 = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled_0), vzero_point_output);
+    xnn_simd_s32_t vy_s32_high_0 = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled_0), vzero_point_output);
+
+    xnn_simd_s16_t vy_0 = xnn_cvt_s32_s16(vy_s32_low_0, vy_s32_high_0);
+    vy_0 = xnn_max_s16(vy_0, voutput_min);
+    vy_0 = xnn_min_s16(vy_0, voutput_max);
+    xnn_simd_s32_t vin1_low_1 = xnn_low_cvt_s16_s32(vin1_1);
+    xnn_simd_s32_t vin1_high_1 = xnn_high_cvt_s16_s32(vin1_1);
+    vin1_low_1 = xnn_sub_s32(vin1_low_1, vzero_point_a);
+    xnn_simd_f32_t vin1_f32_low_scaled_1 = xnn_mul_f32(xnn_cvt_s32_f32(vin1_low_1), vscale_a);
+    vin1_high_1 = xnn_sub_s32(vin1_high_1, vzero_point_a);
+    xnn_simd_f32_t vin1_f32_high_scaled_1 = xnn_mul_f32(xnn_cvt_s32_f32(vin1_high_1), vscale_a);
+
+
+    xnn_simd_f32_t vy_f32_low_scaled_1 = xnn_mul_f32(xnn_rem_f32(vin1_f32_low_scaled_1, vin2_f32_low_scaled),
+                                                  vscale_output);
+    xnn_simd_f32_t vy_f32_high_scaled_1 = xnn_mul_f32(xnn_rem_f32(vin1_f32_high_scaled_1, vin2_f32_high_scaled),
+                                                  vscale_output);
+
+    xnn_simd_s32_t vy_s32_low_1 = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled_1), vzero_point_output);
+    xnn_simd_s32_t vy_s32_high_1 = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled_1), vzero_point_output);
+
+    xnn_simd_s16_t vy_1 = xnn_cvt_s32_s16(vy_s32_low_1, vy_s32_high_1);
+    vy_1 = xnn_max_s16(vy_1, voutput_min);
+    vy_1 = xnn_min_s16(vy_1, voutput_max);
+
+    xnn_storeu_s16(output, vy_0);
+    xnn_storeu_s16(output + 1 * xnn_simd_size_s16, vy_1);
+    output += 2;
+  }
+  for (; batch >= xnn_simd_bytes_s16; batch -= xnn_simd_bytes_s16) {
+    xnn_simd_s16_t vin1 = xnn_loadu_s16(input_a);
+    input_a += xnn_simd_size_s16;
+
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
+    vin1_low = xnn_sub_s32(vin1_low, vzero_point_a);
+    xnn_simd_f32_t vin1_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin1_low), vscale_a);
+    vin1_high = xnn_sub_s32(vin1_high, vzero_point_a);
+    xnn_simd_f32_t vin1_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin1_high), vscale_a);
+
+    xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+    xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
+    vin2_low = xnn_sub_s32(vin2_low, vzero_point_b);
+    xnn_simd_f32_t vin2_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin2_low), vscale_b);
+    vin2_high = xnn_sub_s32(vin2_high, vzero_point_b);
+    xnn_simd_f32_t vin2_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin2_high), vscale_b);
+
+    xnn_simd_f32_t vy_f32_low_scaled = xnn_mul_f32(xnn_rem_f32(vin1_f32_low_scaled, vin2_f32_low_scaled),
+                                                  vscale_output);
+    xnn_simd_f32_t vy_f32_high_scaled = xnn_mul_f32(xnn_rem_f32(vin1_f32_high_scaled, vin2_f32_high_scaled),
+                                                  vscale_output);
+
+    xnn_simd_s32_t vy_s32_low = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled), vzero_point_output);
+    xnn_simd_s32_t vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
+
+    xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
+    vy = xnn_max_s16(vy, voutput_min);
+    vy = xnn_min_s16(vy, voutput_max);
+
+    xnn_storeu_s16(output, vy);
+    output += xnn_simd_size_s16;
+  }
+}
+
+void xnn_qs16_vrremc_minmax_ukernel__scalar_u2(
+    size_t batch,
+    const int16_t* input_a,
+    const int16_t* input_b,
+    int16_t* output,
+    const union xnn_qs16_rem_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
+  assert(input_b != NULL);
+  assert(input_a != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s16 == 1);
+
+  xnn_simd_s32_t vzero_point_a = xnn_set1_s32(params->qs16_scalar.a_zero_point);
+  xnn_simd_s32_t vzero_point_b = xnn_set1_s32(params->qs16_scalar.b_zero_point);
+  xnn_simd_s32_t vzero_point_output = xnn_set1_s32(params->qs16_scalar.output_zero_point);
+
+  xnn_simd_f32_t vscale_a = xnn_set1_f32(params->qs16_scalar.a_scale);
+  xnn_simd_f32_t vscale_b = xnn_set1_f32(params->qs16_scalar.b_scale);
+  xnn_simd_f32_t vscale_output = xnn_set1_f32(params->qs16_scalar.output_scale);
+  xnn_simd_s16_t voutput_min = xnn_set1_s16(params->qs16_scalar.output_min);
+  xnn_simd_s16_t voutput_max = xnn_set1_s16(params->qs16_scalar.output_max);
+
+  xnn_simd_s16_t vin1 = xnn_set1_s16(*input_b);
+
+  for (; batch >= 2 * sizeof(int16_t); batch -= 2 * sizeof(int16_t)) {
+    xnn_simd_s16_t vin2_0 = xnn_loadu_s16(input_a);
+    xnn_simd_s16_t vin2_1 = xnn_loadu_s16(input_a + 1 * xnn_simd_size_s16);
+    input_a += 2;
+
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
+    vin1_low = xnn_sub_s32(vin1_low, vzero_point_b);
+    xnn_simd_f32_t vin1_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin1_low), vscale_a);
+    vin1_high = xnn_sub_s32(vin1_high, vzero_point_b);
+    xnn_simd_f32_t vin1_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin1_high), vscale_a);
+
+    xnn_simd_s32_t vin2_low_0 = xnn_low_cvt_s16_s32(vin2_0);
+    xnn_simd_s32_t vin2_high_0 = xnn_high_cvt_s16_s32(vin2_0);
+    vin2_low_0 = xnn_sub_s32(vin2_low_0, vzero_point_a);
+    xnn_simd_f32_t vin2_f32_low_scaled_0 = xnn_mul_f32(xnn_cvt_s32_f32(vin2_low_0), vscale_b);
+    vin2_high_0 = xnn_sub_s32(vin2_high_0, vzero_point_a);
+    xnn_simd_f32_t vin2_f32_high_scaled_0 = xnn_mul_f32(xnn_cvt_s32_f32(vin2_high_0), vscale_b);
+
+
+    xnn_simd_f32_t vy_f32_low_scaled_0 = xnn_mul_f32(xnn_rem_f32(vin1_f32_low_scaled, vin2_f32_low_scaled_0),
+                                                  vscale_output);
+    xnn_simd_f32_t vy_f32_high_scaled_0 = xnn_mul_f32(xnn_rem_f32(vin1_f32_high_scaled, vin2_f32_high_scaled_0),
+                                                  vscale_output);
+
+    xnn_simd_s32_t vy_s32_low_0 = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled_0), vzero_point_output);
+    xnn_simd_s32_t vy_s32_high_0 = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled_0), vzero_point_output);
+
+    xnn_simd_s16_t vy_0 = xnn_cvt_s32_s16(vy_s32_low_0, vy_s32_high_0);
+    vy_0 = xnn_max_s16(vy_0, voutput_min);
+    vy_0 = xnn_min_s16(vy_0, voutput_max);
+    xnn_simd_s32_t vin2_low_1 = xnn_low_cvt_s16_s32(vin2_1);
+    xnn_simd_s32_t vin2_high_1 = xnn_high_cvt_s16_s32(vin2_1);
+    vin2_low_1 = xnn_sub_s32(vin2_low_1, vzero_point_a);
+    xnn_simd_f32_t vin2_f32_low_scaled_1 = xnn_mul_f32(xnn_cvt_s32_f32(vin2_low_1), vscale_b);
+    vin2_high_1 = xnn_sub_s32(vin2_high_1, vzero_point_a);
+    xnn_simd_f32_t vin2_f32_high_scaled_1 = xnn_mul_f32(xnn_cvt_s32_f32(vin2_high_1), vscale_b);
+
+
+    xnn_simd_f32_t vy_f32_low_scaled_1 = xnn_mul_f32(xnn_rem_f32(vin1_f32_low_scaled, vin2_f32_low_scaled_1),
+                                                  vscale_output);
+    xnn_simd_f32_t vy_f32_high_scaled_1 = xnn_mul_f32(xnn_rem_f32(vin1_f32_high_scaled, vin2_f32_high_scaled_1),
+                                                  vscale_output);
+
+    xnn_simd_s32_t vy_s32_low_1 = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled_1), vzero_point_output);
+    xnn_simd_s32_t vy_s32_high_1 = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled_1), vzero_point_output);
+
+    xnn_simd_s16_t vy_1 = xnn_cvt_s32_s16(vy_s32_low_1, vy_s32_high_1);
+    vy_1 = xnn_max_s16(vy_1, voutput_min);
+    vy_1 = xnn_min_s16(vy_1, voutput_max);
+
+    xnn_storeu_s16(output, vy_0);
+    xnn_storeu_s16(output + 1 * xnn_simd_size_s16, vy_1);
+    output += 2;
+  }
+  for (; batch >= xnn_simd_bytes_s16; batch -= xnn_simd_bytes_s16) {
+    xnn_simd_s16_t vin2 = xnn_loadu_s16(input_a);
+    input_a += xnn_simd_size_s16;
+
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
+    vin1_low = xnn_sub_s32(vin1_low, vzero_point_a);
+    xnn_simd_f32_t vin1_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin1_low), vscale_a);
+    vin1_high = xnn_sub_s32(vin1_high, vzero_point_a);
+    xnn_simd_f32_t vin1_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin1_high), vscale_a);
+
+    xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+    xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
+    vin2_low = xnn_sub_s32(vin2_low, vzero_point_b);
+    xnn_simd_f32_t vin2_f32_low_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin2_low), vscale_b);
+    vin2_high = xnn_sub_s32(vin2_high, vzero_point_b);
+    xnn_simd_f32_t vin2_f32_high_scaled = xnn_mul_f32(xnn_cvt_s32_f32(vin2_high), vscale_b);
+
+    xnn_simd_f32_t vy_f32_low_scaled = xnn_mul_f32(xnn_rem_f32(vin1_f32_low_scaled, vin2_f32_low_scaled),
+                                                  vscale_output);
+    xnn_simd_f32_t vy_f32_high_scaled = xnn_mul_f32(xnn_rem_f32(vin1_f32_high_scaled, vin2_f32_high_scaled),
+                                                  vscale_output);
+
+    xnn_simd_s32_t vy_s32_low = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_low_scaled), vzero_point_output);
+    xnn_simd_s32_t vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
+
+    xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
+    vy = xnn_max_s16(vy, voutput_min);
+    vy = xnn_min_s16(vy, voutput_max);
+
+    xnn_storeu_s16(output, vy);
+    output += xnn_simd_size_s16;
+  }
+}
+
 void xnn_s32_vmul_ukernel__scalar_u2(
     size_t batch,
     const int32_t* input_a,

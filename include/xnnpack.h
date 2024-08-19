@@ -2353,6 +2353,7 @@ enum xnn_status xnn_setup_multiply_nd_qs16(
   const int16_t* input1,
   const int16_t* input2,
   int16_t* output);
+  
 enum xnn_status xnn_create_remainder_nd_f32(
   uint32_t flags,
   xnn_operator_t* remainder_op_out);
@@ -2370,6 +2371,32 @@ enum xnn_status xnn_setup_remainder_nd_f32(
   const float* input1,
   const float* input2,
   float* output);
+
+enum xnn_status xnn_create_remainder_nd_qs16(
+  int16_t input1_zero_point,
+  float input1_scale,
+  int16_t input2_zero_point,
+  float input2_scale,
+  int16_t output_zero_point,
+  float output_scale,
+  int16_t output_min,
+  int16_t output_max,
+  uint32_t flags,
+  xnn_operator_t* remainder_op_out);
+
+enum xnn_status xnn_reshape_remainder_nd_qs16(
+  xnn_operator_t remainder_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_remainder_nd_qs16(
+  xnn_operator_t remainder_op,
+  const int16_t* input1,
+  const int16_t* input2,
+  int16_t* output);
 
 enum xnn_status xnn_create_multiply_nd_s32(
   uint32_t flags,

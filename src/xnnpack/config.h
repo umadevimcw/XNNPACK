@@ -46,6 +46,8 @@ XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qs8_vadd_confi
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qs8_vmul_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config*
 xnn_init_qs16_vmul_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config*
+xnn_init_qs16_vrem_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qu8_vadd_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qu8_vmul_config();
 
