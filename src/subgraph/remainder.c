@@ -15,6 +15,7 @@
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-type.h"
 #include "xnnpack/operator.h"
+#include "xnnpack/requantization.h"
 #include "xnnpack/reshape-helpers.h"
 #include "xnnpack/subgraph-validation.h"
 #include "xnnpack/subgraph.h"
@@ -29,7 +30,17 @@ static enum xnn_status create_remainder_operator(
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 2);
+  const uint32_t input1_id = node->inputs[0];
+  assert(input1_id != XNN_INVALID_VALUE_ID);
+  assert(input1_id < num_values);
+  const uint32_t input2_id = node->inputs[1];
+  assert(input2_id != XNN_INVALID_VALUE_ID);
+  assert(input2_id < num_values);
+
   assert(node->num_outputs == 1);
+  const uint32_t output_id = node->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
 
   enum xnn_status status;
   switch (node->compute_type) {
@@ -38,6 +49,23 @@ static enum xnn_status create_remainder_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
+    case xnn_compute_type_qs16:
+    {
+      const float output_scale = values[output_id].quantization.scale;
+      const int32_t output_zero_point = values[output_id].quantization.zero_point;
+      const int16_t output_min = xnn_qs16_quantize(node->activation.output_min, output_scale, output_zero_point);
+      const int16_t output_max = xnn_qs16_quantize(node->activation.output_max, output_scale, output_zero_point);
+      status = xnn_create_remainder_nd_qs16(
+        (int16_t) values[input1_id].quantization.zero_point,
+        values[input1_id].quantization.scale,
+        (int16_t) values[input2_id].quantization.zero_point,
+        values[input2_id].quantization.scale,
+        (int16_t) values[output_id].quantization.zero_point,
+        values[output_id].quantization.scale,
+        output_min,output_max,
+        node->flags,&opdata->operator_objects[0]);
+      break;
+    }
     default:
       XNN_UNREACHABLE;
   }
@@ -102,6 +130,11 @@ static enum xnn_status reshape_remainder_operator(
         opdata->shape2.dim,
         threadpool);
       break;
+    case xnn_operator_type_remainder_nd_qs16:
+      status = xnn_reshape_remainder_nd_qs16(
+        opdata->operator_objects[0], opdata->shape1.num_dims, opdata->shape1.dim, opdata->shape2.num_dims,
+        opdata->shape2.dim, threadpool);
+      break;
     default:
       XNN_UNREACHABLE;
   }
@@ -146,6 +179,10 @@ static enum xnn_status setup_remainder_operator(
       return xnn_setup_remainder_nd_f32(
         opdata->operator_objects[0],
         input1_data, input2_data, output_data);
+      break;
+    case xnn_operator_type_remainder_nd_qs16:
+      return xnn_setup_remainder_nd_qs16(opdata->operator_objects[0], input1_data, input2_data, output_data);
+      break;
     default:
       XNN_UNREACHABLE;
   }
@@ -178,6 +215,7 @@ enum xnn_status xnn_define_remainder(
 
   switch (input1_value->datatype) {
     case xnn_datatype_fp32:
+    case xnn_datatype_qcint16:
       break;
     default:
       xnn_log_error(
@@ -200,6 +238,7 @@ enum xnn_status xnn_define_remainder(
 
   switch (input2_value->datatype) {
     case xnn_datatype_fp32:
+    case xnn_datatype_qcint16:
       break;
     default:
       xnn_log_error(
@@ -224,6 +263,9 @@ enum xnn_status xnn_define_remainder(
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
+      break;
+    case xnn_datatype_qcint16:
+      compute_type = xnn_compute_type_qs16;
       break;
     default:
       xnn_log_error(
