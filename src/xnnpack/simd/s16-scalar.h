@@ -25,6 +25,22 @@ typedef int16_t xnn_simd_s16_t;
 
 // Arithmetic operations.
 
+// Bitwise operations
+static XNN_INLINE xnn_simd_s16_t xnn_clz_s16(xnn_simd_s16_t a) {
+  xnn_simd_s16_t clz = 0;
+  if (a == 0) {
+    clz = 16;
+  } else if (a < 0) {
+    clz = 0;
+  } else {
+    // float af = (float)a;
+    // int exponent = ((a >> 23) & 0xFF) - 127;
+    // clz = 15 - exponent;
+    clz = int16_t(__builtin_clz(a) - 16);
+  }
+  return clz;
+}
+
 static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t *ptr) { return *ptr; }
 
 static XNN_INLINE xnn_simd_s16_t xnn_load_s16(const int16_t *ptr) { return *ptr; }

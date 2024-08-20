@@ -27,6 +27,56 @@ typedef __m512i xnn_simd_s16_t;
 
 // Arithmetic operations.
 
+// Bitwise operations
+
+static XNN_INLINE xnn_simd_s16_t xnn_clz_s16(xnn_simd_s16_t a) {
+  xnn_simd_s16_t shuffled_a =
+      _mm512_shuffle_i32x4(a, a, _MM_SHUFFLE(3, 2, 3, 2));
+  xnn_simd_s16_t shuffled_b =
+      _mm512_shuffle_i32x4(a, a, _MM_SHUFFLE(1, 0, 1, 0));
+
+  __m256i lower_half = _mm512_castsi512_si256(shuffled_b);
+  __m256i upper_half = _mm512_castsi512_si256(shuffled_a);
+
+  __m512i lowi = _mm512_cvtepi16_epi32(lower_half);
+  __m512i highi = _mm512_cvtepi16_epi32(upper_half);
+
+  __m512 low = _mm512_cvtepi32_ps(lowi);
+  __m512 high = _mm512_cvtepi32_ps(highi);
+
+  xnn_simd_s16_t low_a = _mm512_castps_si512(low);
+  xnn_simd_s16_t high_a = _mm512_castps_si512(high);
+
+  xnn_simd_s16_t shift_low = _mm512_srli_epi32(low_a, 23);
+  xnn_simd_s16_t shift_high = _mm512_srli_epi32(high_a, 23);
+
+  xnn_simd_s16_t mask = _mm512_set_epi16(31, 29, 27, 25, 23, 21, 19, 17, 15, 13,
+                                        11, 9, 7, 5, 3, 1, 30, 28, 26, 24, 22,
+                                        20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0);
+  xnn_simd_s16_t mlow = _mm512_permutexvar_epi16(mask, shift_low);
+  xnn_simd_s16_t mhigh = _mm512_permutexvar_epi16(mask, shift_high);
+
+  __m256i ai = _mm512_extracti64x4_epi64(mlow, 0);
+  __m256i bi = _mm512_extracti64x4_epi64(mhigh, 0);
+
+  xnn_simd_s16_t exponent =
+      _mm512_inserti64x4(_mm512_castsi256_si512(ai), bi, 1);
+
+  exponent = _mm512_and_si512(exponent, _mm512_set1_epi16(0xFF));
+
+  xnn_simd_s16_t result =
+      _mm512_sub_epi16(_mm512_set1_epi16(15),
+                      _mm512_sub_epi16(exponent, _mm512_set1_epi16(127)));
+
+  xnn_simd_s16_t zero = _mm512_setzero_si512();
+
+  __mmask32 maskl = _mm512_cmpge_epi16_mask(a, zero);
+  result = _mm512_maskz_mov_epi16(maskl, result);
+  __mmask32 maskz = _mm512_cmpeq_epi16_mask(a, zero);
+  result = _mm512_mask_mov_epi16(result, maskz, _mm512_set1_epi16(16));
+
+  return result;
+}
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t* ptr) {
