@@ -2008,6 +2008,13 @@ typedef void (*xnn_f32_vround_ukernel_fn)(
     float* output,
     const union xnn_f32_rnd_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+// VRNDNRTAFZ: Vector ROUND NEAREST AWAY FROM ZERO elementwise
+typedef void (*xnn_f32_vrndnrtafz_ukernel_fn)(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 // VSIGMOID: Vector SIGMOID elementwise
 
 typedef void (*xnn_f16_vsigmoid_ukernel_fn)(

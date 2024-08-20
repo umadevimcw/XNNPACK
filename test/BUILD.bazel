@@ -242,6 +242,7 @@ xnnpack_cc_library(
     "f32_vrelu",
     "f32_vrndd",
     "f32_vrndne",
+    "f32_vrndnrtafz",
     "f32_vrndu",
     "f32_vrndz",
     "f32_vrsqrt",

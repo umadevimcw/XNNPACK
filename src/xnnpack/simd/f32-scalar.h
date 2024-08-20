@@ -82,6 +82,27 @@ static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) { return fabsf(a)
 
 static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) { return -a; }
 
+static XNN_INLINE xnn_simd_f32_t xnn_rndnrtafz_f32(xnn_simd_f32_t a) {
+    // Extract the sign of the input
+    float sign = copysignf(1.0f, a);
+
+    // Compute the absolute value
+    float abs_v = fabsf(a);
+
+    // Add 0.5 to the absolute value
+    float abs_plus_half = abs_v + 0.5f;
+
+    // Floor the result of (absolute value + 0.5)
+    float floor_v = floorf(abs_plus_half);
+
+    // Determine whether to round up or down
+    float half_subtracted = floor_v - 0.5f;
+    float rounded = (abs_v < half_subtracted) ? floor_v - 1.0f : floor_v;
+
+    // Apply the sign back
+    return sign * rounded;
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a, xnn_simd_f32_t b) {
   const uint32_t res = *(const uint32_t *)&a & *(const uint32_t *)&b;

@@ -90,6 +90,30 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return Q6_Vsf_vsub_VsfVsf(v0, a);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_rndnrtafz_f32(xnn_simd_f32_t a) {
+    // Extract the sign of each element
+    float_vector_t sign_mask = vdupq_n_f32(-0.0f); 
+    float_vector_t sign = v_andq_f32(a, sign_mask);
+
+    // Compute absolute value
+    float_vector_t abs_v = v_absq_f32(a); 
+
+    // Add 0.5 to the absolute values
+    float_vector_t half = vdupq_n_f32(0.5f);
+    float_vector_t abs_plus_half = vaddq_f32(abs_v, half);
+
+    // Floor the result of (absolute value + 0.5)
+    float_vector_t floor_v = vfloorq_f32(abs_plus_half); 
+
+    // Determine whether to round up or down
+    float_vector_t half_subtracted = vsubq_f32(floor_v, half);
+    uint32_t mask = vcltq_f32(abs_v, half_subtracted); 
+    float_vector_t rounded = vorrq_f32(vandq_f32(mask, floor_v), vandq_f32(vmvnq_f32(mask), half_subtracted));
+
+    // Apply the sign back
+    return veorq_f32(rounded, sign);
+}
+
 // Logical operations.
 
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,

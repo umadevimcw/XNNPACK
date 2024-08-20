@@ -221,6 +221,53 @@ void VUnaryMicrokernelTester::Test(
       TolExact, -5.0f, 5.0f);
 }
 
+  void VUnaryMicrokernelTester::TestRndNrtAFZ(xnn_f32_vrndnrtafz_ukernel_fn vrndnrtafz,
+            xnn_init_f32_default_params_fn init_params) const{
+   xnnpack::ReplicableRandomDevice rng;
+  auto f32rng =
+      std::bind(std::bind(std::uniform_real_distribution<float>(), std::ref(rng)));
+
+  std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<float> y(batch_size() +
+                        (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+  std::vector<float> y_ref(batch_size());
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(x.begin(), x.end(), std::ref(f32rng));
+    std::fill(y.begin(), y.end(), std::numeric_limits<float>::min());
+    if (inplace()) {
+      std::copy(x.cbegin(), x.cend(), y.begin());
+    } else {
+      std::fill(y.begin(), y.end(), std::numeric_limits<float>::min());
+    }
+    const float* x_data = inplace() ? y.data() : x.data();
+
+    // Compute reference results.
+    for (size_t i = 0; i < batch_size(); i++) {
+      y_ref[i] = x_data[i] > 0.0f ? std::floor(x_data[i] + 0.5f) : std::ceil(x_data[i] - 0.5f);
+    }
+    // Prepare parameters.
+    xnn_f32_default_params params;
+    if (init_params != nullptr) {
+      init_params(&params);
+    }
+
+    // Call optimized micro-kernel.
+    vrndnrtafz(batch_size() * sizeof(float), x_data, y.data(), &params);
+
+    // Verify results.
+    for (size_t i = 0; i < batch_size(); i++) {
+      EXPECT_EQ(y_ref[i], y[i]) << "at " << i << " / " << batch_size();
+    }
+  }
+}
+   
+   /*TestFP32(
+      vrndnrtafz, InitParamsWrapper(init_params),
+      [this](float x) -> float { return x > 0.0f ? std::floor(x + 0.5f) : std::ceil(x - 0.5f); },
+      TolExact, -5.0f, 5.0f);
+      
+  }*/
+
 void VUnaryMicrokernelTester::Test(
     xnn_f16_vsigmoid_ukernel_fn vsigmoid,
     xnn_init_f16_sigmoid_params_fn init_params) const {

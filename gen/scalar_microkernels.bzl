@@ -483,6 +483,7 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/f32-vrnd/gen/f32-vrndz-scalar-libm-u1.c",
     "src/f32-vrnd/gen/f32-vrndz-scalar-libm-u2.c",
     "src/f32-vrnd/gen/f32-vrndz-scalar-libm-u4.c",
+    "src/f32-vrndnrtafz/gen/f32-vrndnrtafz-scalar.c",
     "src/f32-vrsqrt/gen/f32-vrsqrt-scalar-rsqrt-u1.c",
     "src/f32-vrsqrt/gen/f32-vrsqrt-scalar-rsqrt-u2.c",
     "src/f32-vrsqrt/gen/f32-vrsqrt-scalar-rsqrt-u4.c",

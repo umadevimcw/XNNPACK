@@ -98,6 +98,30 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return wasm_f32x4_neg(a);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_rndnrtafz_f32(xnn_simd_f32_t a) {
+    // Extract the sign of each element
+    xnn_simd_f32_t sign_mask = wasm_f32x4_splat(-0.0f);  // -0.0f to get the sign
+    xnn_simd_f32_t sign = wasm_v128_and(a, sign_mask);
+
+    // Compute absolute value
+    xnn_simd_f32_t abs_a = wasm_v128_andnot(sign_mask, a);
+
+    // Add 0.5 to the absolute values
+    xnn_simd_f32_t half = wasm_f32x4_splat(0.5f);
+    xnn_simd_f32_t abs_plus_half = wasm_f32x4_add(abs_a, half);
+
+    // Floor the result of (absolute value + 0.5)
+    xnn_simd_f32_t floor_v = wasm_f32x4_floor(abs_plus_half);
+
+    // Determine whether to round up or down
+    xnn_simd_f32_t half_subtracted = wasm_f32x4_sub(floor_v, half);
+    xnn_simd_f32_t cmp = wasm_f32x4_lt(abs_a, half_subtracted);
+    xnn_simd_f32_t rounded = wasm_v128_bitselect(wasm_f32x4_sub(floor_v, wasm_f32x4_splat(1.0f)), floor_v, cmp);
+
+    // Apply the sign back
+    return wasm_v128_or(rounded, sign);
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {

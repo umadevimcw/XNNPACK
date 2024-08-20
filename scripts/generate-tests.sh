@@ -221,6 +221,7 @@ tools/generate-vunary-test.py --spec test/f32-vneg.yaml --output test/f32-vneg.c
 tools/generate-vunary-test.py --spec test/f32-vrelu.yaml --output test/f32-vrelu.cc &
 tools/generate-vunary-test.py --spec test/f32-vrndd.yaml  --output test/f32-vrndd.cc &
 tools/generate-vunary-test.py --spec test/f32-vrndne.yaml --output test/f32-vrndne.cc &
+tools/generate-vunary-test.py --spec test/f32-vrndnrtafz.yaml --output test/f32-vrndnrtafz.cc &
 tools/generate-vunary-test.py --spec test/f32-vrndu.yaml  --output test/f32-vrndu.cc &
 tools/generate-vunary-test.py --spec test/f32-vrndz.yaml  --output test/f32-vrndz.cc &
 tools/generate-vunary-test.py --spec test/f32-vrsqrt.yaml --output test/f32-vrsqrt.cc &

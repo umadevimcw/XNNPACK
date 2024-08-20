@@ -94,6 +94,37 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return xnn_sub_f32(xnn_zero_f32(), a);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_rndnrtafz_f32(xnn_simd_f32_t a) {
+    // Extract the sign of each element
+    xnn_simd_f32_t sign_mask = _mm_set1_ps(-0.0f);  // -0.0f to get the sign
+    xnn_simd_f32_t sign = _mm_and_ps(a, sign_mask);
+
+    // Compute absolute value
+    xnn_simd_f32_t abs_a = _mm_andnot_ps(sign_mask, a);
+
+    // Add 0.5 to the absolute values
+    xnn_simd_f32_t half = _mm_set1_ps(0.5f);
+    xnn_simd_f32_t abs_plus_half = _mm_add_ps(abs_a, half);
+
+    // Floor the result of (absolute value + 0.5)
+    // Truncate the value to an integer value
+    __m128i abs_plus_half_i = _mm_cvttps_epi32(abs_plus_half);
+    xnn_simd_f32_t abs_plus_half_f = _mm_cvtepi32_ps(abs_plus_half_i);
+    // If the truncated value is greater than the original, subtract 1.0
+    xnn_simd_f32_t mask = _mm_cmpgt_ps(abs_plus_half_f, abs_plus_half);
+    xnn_simd_f32_t one = _mm_set1_ps(1.0f);
+    xnn_simd_f32_t floor_v = _mm_sub_ps(abs_plus_half_f, _mm_and_ps(mask, one));
+   
+    // Determine whether to round up or down
+    xnn_simd_f32_t half_subtracted = _mm_sub_ps(floor_v, half);
+    xnn_simd_f32_t cmp = _mm_cmplt_ps(abs_a, half_subtracted);
+    xnn_simd_f32_t rounded_down = _mm_sub_ps(floor_v, _mm_set1_ps(1.0f));
+    xnn_simd_f32_t rounded = _mm_or_ps(_mm_and_ps(cmp, rounded_down), _mm_andnot_ps(cmp, floor_v));
+
+    // Apply the sign back
+    return _mm_or_ps(rounded, sign);
+}
+
 // Logical operations.
 
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,

@@ -96,6 +96,31 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return xnn_sub_f32(xnn_zero_f32(), a);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_rndnrtafz_f32(xnn_simd_f32_t a) {
+    // Extract the sign of each element
+    xnn_simd_f32_t sign_mask = _mm512_set1_ps(-0.0f);  // -0.0f to get the sign
+    xnn_simd_f32_t sign = _mm512_and_ps(a, sign_mask);
+
+    // Compute absolute value
+    xnn_simd_f32_t abs_a = _mm512_andnot_ps(sign_mask, a);
+
+    // Add 0.5 to the absolute values
+    xnn_simd_f32_t half = _mm512_set1_ps(0.5f);
+    xnn_simd_f32_t abs_plus_half = _mm512_add_ps(abs_a, half);
+
+    // Floor the result of (absolute value + 0.5)
+    xnn_simd_f32_t floor_v = _mm512_floor_ps(abs_plus_half);
+
+    // Determine whether to round up or down
+    xnn_simd_f32_t half_subtracted = _mm512_sub_ps(floor_v, half);
+    __mmask16 cmp_mask = _mm512_cmp_ps_mask(abs_a, half_subtracted, _CMP_LT_OQ);
+    xnn_simd_f32_t rounded_down = _mm512_sub_ps(floor_v, _mm512_set1_ps(1.0f));
+    xnn_simd_f32_t rounded = _mm512_mask_blend_ps(cmp_mask, floor_v, rounded_down);
+
+    // Apply the sign back
+    return _mm512_or_ps(rounded, sign);
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {

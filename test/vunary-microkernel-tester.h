@@ -200,6 +200,9 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vround_ukernel_fn vrnd, OpType op_type,
             xnn_init_f32_rnd_params_fn init_params = nullptr) const;
 
+  void TestRndNrtAFZ(xnn_f32_vrndnrtafz_ukernel_fn vrndnrtafz,
+            xnn_init_f32_default_params_fn init_params = nullptr) const;
+
   void Test(xnn_f16_vsigmoid_ukernel_fn vsigmoid,
             xnn_init_f16_sigmoid_params_fn init_params) const;
 

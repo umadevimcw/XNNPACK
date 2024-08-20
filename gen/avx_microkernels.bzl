@@ -195,6 +195,7 @@ ALL_AVX_MICROKERNEL_SRCS = [
     "src/f32-vrnd/gen/f32-vrndu-avx-u16.c",
     "src/f32-vrnd/gen/f32-vrndz-avx-u8.c",
     "src/f32-vrnd/gen/f32-vrndz-avx-u16.c",
+    "src/f32-vrndnrtafz/gen/f32-vrndnrtafz-avx.c",
     "src/f32-vrsqrt/gen/f32-vrsqrt-avx-rsqrt-u8.c",
     "src/f32-vrsqrt/gen/f32-vrsqrt-avx-rsqrt-u16.c",
     "src/f32-vrsqrt/gen/f32-vrsqrt-avx-rsqrt-u32.c",

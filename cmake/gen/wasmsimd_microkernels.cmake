@@ -827,6 +827,7 @@ SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vrnd/gen/f32-vrndu-wasmsimd-u8.c
   src/f32-vrnd/gen/f32-vrndz-wasmsimd-u4.c
   src/f32-vrnd/gen/f32-vrndz-wasmsimd-u8.c
+  src/f32-vrndnrtafz/gen/f32-vrndnrtafz-wasmsimd.c
   src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-lut64-p2-div-u4.c
   src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-lut64-p2-div-u8.c
   src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-lut64-p2-div-u12.c
