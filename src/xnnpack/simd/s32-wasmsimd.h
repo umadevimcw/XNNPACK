@@ -41,6 +41,12 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return wasm_i32x4_min(a, b);
 }
 
+static XNN_INLINE xnn_simd_s32_t xnn_sllv_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  int32_t bscale = wasm_i32x4_extract_lane(b,0);
+  return wasm_i32x4_shl(a, bscale);
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {

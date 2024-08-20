@@ -41,6 +41,21 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return _mm_min_epi32(a, b);
 }
 
+static XNN_INLINE xnn_simd_s32_t xnn_sllv_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  xnn_simd_s32_t tmp =  _mm_cmplt_epi32(b, _mm_set1_epi32 (32));
+  a = _mm_and_si128(a, tmp);
+  b = _mm_and_si128(b, tmp);
+  tmp =  _mm_cmpgt_epi32(b, _mm_set1_epi32 (-1));
+  a = _mm_and_si128(a, tmp);
+  b = _mm_and_si128(b, tmp);
+  a =  _mm_insert_epi32(a, (_mm_extract_epi32(a, 0) <<  _mm_extract_epi32(b, 0)), 0);
+  a =  _mm_insert_epi32(a, (_mm_extract_epi32(a, 1) <<  _mm_extract_epi32(b, 1)), 1);
+  a =  _mm_insert_epi32(a, (_mm_extract_epi32(a, 2) <<  _mm_extract_epi32(b, 2)), 2);
+  a =  _mm_insert_epi32(a, (_mm_extract_epi32(a, 3) <<  _mm_extract_epi32(b, 3)), 3);
+  return a;  
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {
