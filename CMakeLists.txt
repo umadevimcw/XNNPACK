@@ -414,6 +414,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/prelu.c
   src/subgraph/reciprocal-square-root.c
   src/subgraph/reshape-helpers.c
+  src/subgraph/round-nearest-afz.c
   src/subgraph/scaled-dot-product-attention.c
   src/subgraph/sigmoid.c
   src/subgraph/softmax.c
@@ -2002,6 +2003,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(round-nearest-afz-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME round-nearest-afz-nc-test COMMAND round-nearest-afz-nc-test)
 
+    ADD_EXECUTABLE(round-nearest-afz-test test/round-nearest-afz.cc)
+    TARGET_INCLUDE_DIRECTORIES(round-nearest-afz-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(round-nearest-afz-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME round-nearest-afz-test COMMAND round-nearest-afz-test)
+    
     ADD_EXECUTABLE(sigmoid-test test/sigmoid.cc)
     SET_TARGET_PROPERTIES(sigmoid-test PROPERTIES CXX_EXTENSIONS YES)
     TARGET_INCLUDE_DIRECTORIES(sigmoid-test PRIVATE src test)

@@ -97,6 +97,8 @@
   string: "Reshape 2D"
 - name: xnn_node_type_rope
   string: "RoPE"
+- name: xnn_node_type_round_nearest_afz
+  string: "Round Nearest Away From Zero"
 - name: xnn_node_type_scaled_dot_product_attention
   string: "Scaled Dot Product Attention"
 - name: xnn_node_type_sigmoid

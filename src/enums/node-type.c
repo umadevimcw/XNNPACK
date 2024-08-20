@@ -13,10 +13,10 @@
 #include "xnnpack/node-type.h"
 
 #if XNN_LOG_LEVEL > 0
-static const uint16_t offset[62] = {
+static const uint16_t offset[63] = {
   0, 8, 12, 17, 35, 54, 71, 93, 101, 107, 120, 133, 146, 159, 167, 182, 187, 197, 214, 232, 257, 264, 268, 272, 284,
   296, 308, 314, 330, 353, 358, 384, 410, 432, 454, 464, 468, 479, 494, 503, 512, 522, 529, 535, 558, 569, 574, 603,
-  611, 619, 637, 644, 656, 675, 695, 707, 722, 748, 761, 778, 787, 792
+  632, 640, 648, 666, 673, 685, 704, 724, 736, 751, 777, 790, 807, 816, 821
 };
 
 static const char data[] =
@@ -66,6 +66,7 @@ static const char data[] =
   "Reciprocal Square Root\0"
   "Reshape 2D\0"
   "RoPE\0"
+  "Round Nearest Away From Zero\0"
   "Scaled Dot Product Attention\0"
   "Sigmoid\0"
   "Softmax\0"

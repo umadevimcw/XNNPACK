@@ -63,6 +63,7 @@ enum xnn_node_type {
   xnn_node_type_reciprocal_square_root,
   xnn_node_type_reshape_2d,
   xnn_node_type_rope,
+  xnn_node_type_round_nearest_afz,
   xnn_node_type_scaled_dot_product_attention,
   xnn_node_type_sigmoid,
   xnn_node_type_softmax,
