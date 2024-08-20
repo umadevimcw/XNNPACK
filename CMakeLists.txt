@@ -1997,6 +1997,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(reshape-helpers-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME reshape-helpers-test COMMAND reshape-helpers-test)
 
+    ADD_EXECUTABLE(round-nearest-afz-nc-test test/round-nearest-afz-nc.cc)
+    TARGET_INCLUDE_DIRECTORIES(round-nearest-afz-nc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(round-nearest-afz-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME round-nearest-afz-nc-test COMMAND round-nearest-afz-nc-test)
+
     ADD_EXECUTABLE(sigmoid-test test/sigmoid.cc)
     SET_TARGET_PROPERTIES(sigmoid-test PROPERTIES CXX_EXTENSIONS YES)
     TARGET_INCLUDE_DIRECTORIES(sigmoid-test PRIVATE src test)

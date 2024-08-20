@@ -1422,6 +1422,23 @@ enum xnn_status xnn_create_reciprocal_square_root_nc_f32(
       xnn_operator_type_reciprocal_square_root_nc_f32, rsqrt_op_out);
 }
 
+enum xnn_status xnn_create_roundnearestafz_nc_f32(
+    uint32_t flags,
+    xnn_operator_t* roundnearestafz_op_out)
+{
+  const struct xnn_unary_elementwise_config* f32_roundnearestafz_config = xnn_init_f32_rndnrtafz_config();
+
+  union xnn_f32_default_params params;
+  if XNN_LIKELY(f32_roundnearestafz_config != NULL && f32_roundnearestafz_config->init.f32_default != NULL) {
+    f32_roundnearestafz_config->init.f32_default(&params);
+  }
+
+  return create_unary_elementwise_nc(
+    flags, f32_roundnearestafz_config, /*rminmax_config=*/NULL,
+    &params, sizeof(params),
+    xnn_operator_type_roundnearestafz_nc_f32, roundnearestafz_op_out);
+}
+
 enum xnn_status xnn_create_tanh_nc_f16(
     uint32_t flags,
     xnn_operator_t* tanh_op_out)
@@ -2385,6 +2402,25 @@ enum xnn_status xnn_reshape_reciprocal_square_root_nc_f32(
     threadpool);
 }
 
+enum xnn_status xnn_reshape_roundnearestafz_nc_f32(
+    xnn_operator_t rndnrtafz_op,
+    size_t batch_size,
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    pthreadpool_t threadpool)
+{
+  return reshape_unary_elementwise_nc(
+    rndnrtafz_op, xnn_operator_type_roundnearestafz_nc_f32,
+    batch_size,
+    channels, input_stride, output_stride,
+    /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    &rndnrtafz_op->params.f32_rsqrt, sizeof(rndnrtafz_op->params.f32_rsqrt),
+    threadpool);
+}
+
+
 enum xnn_status xnn_reshape_sigmoid_nc_f16(
     xnn_operator_t sigmoid_op,
     size_t batch_size,
@@ -3042,6 +3078,16 @@ enum xnn_status xnn_setup_reciprocal_square_root_nc_f32(
 {
   return setup_unary_elementwise_nc(
     rsqrt_op, xnn_operator_type_reciprocal_square_root_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_roundnearestafz_nc_f32(
+    xnn_operator_t rndnrtafz_op,
+    const float* input,
+    float* output)
+{
+  return setup_unary_elementwise_nc(
+    rndnrtafz_op, xnn_operator_type_roundnearestafz_nc_f32,
     input, output);
 }
 
@@ -3845,6 +3891,34 @@ enum xnn_status xnn_run_reciprocal_square_root_nc_f32(
     channels, input_stride, output_stride, batch_size,
     input, output,
     f32_rsqrt_config, &params, sizeof(params),
+    /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    flags,
+    threadpool);
+}
+
+enum xnn_status xnn_run_roundnearestafz_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  uint32_t flags,
+  pthreadpool_t threadpool)
+{
+  const struct xnn_unary_elementwise_config* f32_rndnrtafz_config = xnn_init_f32_rndnrtafz_config();
+
+  union xnn_f32_default_params params;
+  if XNN_LIKELY(f32_rndnrtafz_config != NULL && f32_rndnrtafz_config->init.f32_rndnrtafz != NULL) {
+    f32_rndnrtafz_config->init.f32_rndnrtafz(&params);
+  }
+
+  return run_unary_elementwise_nc(
+    xnn_operator_type_roundnearestafz_nc_f32,
+    channels, input_stride, output_stride, batch_size,
+    input, output,
+    f32_rndnrtafz_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,

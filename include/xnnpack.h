@@ -5655,6 +5655,33 @@ enum xnn_status xnn_setup_rope_nthc_f32(
   const float* weights,
   float* output);
 
+enum xnn_status xnn_create_roundnearestafz_nc_f32(
+  uint32_t flags,
+  xnn_operator_t* roundnearestafz_op_out);
+
+enum xnn_status xnn_reshape_roundnearestafz_nc_f32(
+  xnn_operator_t roundnearestafz_op,
+  size_t batch_size,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_roundnearestafz_nc_f32(
+  xnn_operator_t roundnearestafz_op,
+  const float* input1,
+  float* output);
+
+enum xnn_status xnn_run_roundnearestafz_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 // N: batch size
 // H: number of heads
 // T: tokens (sequence length)
