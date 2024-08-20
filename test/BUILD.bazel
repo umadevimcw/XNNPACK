@@ -281,6 +281,7 @@ xnnpack_cc_library(
     "s8_vclamp",
     "u8_vclamp",
     "u64_u32_vsqrtshift",
+    "s32-popcnt-nc",
 ]]
 
 [xnnpack_unit_test(
