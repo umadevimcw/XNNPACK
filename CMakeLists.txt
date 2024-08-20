@@ -1556,6 +1556,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(log-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME log-nc-test COMMAND log-nc-test)
 
+    ADD_EXECUTABLE(lshift-nd-test test/lshift-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(lshift-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(lshift-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME lshift-nd-test COMMAND lshift-nd-test)
+    
     ADD_EXECUTABLE(max-pooling-nhwc-test test/max-pooling-nhwc.cc)
     TARGET_INCLUDE_DIRECTORIES(max-pooling-nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(max-pooling-nhwc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)

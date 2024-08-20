@@ -27,6 +27,7 @@ class BinaryElementwiseOperatorTester {
     Add,
     CopySign,
     Divide,
+    LShift,
     Maximum,
     Minimum,
     Multiply,
@@ -188,6 +189,8 @@ class BinaryElementwiseOperatorTester {
         return std::copysign(a, b);
       case OperationType::Divide:
         return a / b;
+      case OperationType::LShift:
+        return (b > 31 || b < 0)? 0 : (a << b);
       case OperationType::Maximum:
         return std::max<int32_t>(a, b);
       case OperationType::Minimum:

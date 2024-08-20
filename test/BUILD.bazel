@@ -1534,6 +1534,7 @@ xnnpack_binary(
     "copysign_nd",
     "divide_nd",
     "divide_nd_eager",
+    "lshift_nd",
     "maximum_nd",
     "maximum_nd_eager",
     "minimum_nd",

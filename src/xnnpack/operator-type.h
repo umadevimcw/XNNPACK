@@ -116,6 +116,7 @@ enum xnn_operator_type {
   xnn_operator_type_global_sum_pooling_nwc_f32,
   xnn_operator_type_hardswish_nc_f16,
   xnn_operator_type_hardswish_nc_f32,
+  xnn_operator_type_lshift_nd_s32,
   xnn_operator_type_leaky_relu_nc_f16,
   xnn_operator_type_leaky_relu_nc_f32,
   xnn_operator_type_leaky_relu_nc_qs8,
