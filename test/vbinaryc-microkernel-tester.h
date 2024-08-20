@@ -24,6 +24,7 @@ class VBinaryCMicrokernelTester {
     RCopySignC,
     DivC,
     RDivC,
+    LShiftC,
     MaxC,
     MinC,
     MulC,

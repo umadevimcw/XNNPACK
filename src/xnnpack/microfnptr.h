@@ -1787,6 +1787,15 @@ typedef void (*xnn_s32_vmul_ukernel_fn)(
     int32_t* output,
     const union xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+// LEFTSHIFT: Vector LeftShift (S32 bit)elementwise
+
+typedef void (*xnn_s32_vlshift_ukernel_fn)(
+    size_t batch,
+    const int32_t* input_a,
+    const int32_t* input_b,
+    int32_t* output,
+    const union xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 
 // VCVT: Vector ConVerT elementwise
 

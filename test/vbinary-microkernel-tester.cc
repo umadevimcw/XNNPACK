@@ -314,6 +314,9 @@ void VBinaryMicrokernelTester::Test(
         case OpType::Div:
           y_ref[i] = a_data[i] / b_data[i];
           break;
+        case OpType::LShift:
+          y_ref[i] = (b_data[i] > 31 || b_data[i]< 0) ? 0 : a_data[i] << b_data[i];
+          break;
         case OpType::Max:
           y_ref[i] = std::max<int32_t>(a_data[i], b_data[i]);
           break;

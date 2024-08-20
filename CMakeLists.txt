@@ -399,7 +399,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/hardswish.c
   src/subgraph/leaky-relu.c
   src/subgraph/log.c
-  src/subgraph/max-pooling-2d.c
+    src/subgraph/max-pooling-2d.c
   src/subgraph/maximum2.c
   src/subgraph/minimum2.c
   src/subgraph/multiply2.c
@@ -2738,6 +2738,18 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(s32-vmulc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
   TARGET_LINK_LIBRARIES(s32-vmulc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME s32-vmulc-test COMMAND s32-vmulc-test)
+
+  ADD_EXECUTABLE(s32-vlshift-test test/s32-vlshift.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vlshift-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vlshift-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vlshift-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vlshift-test COMMAND s32-vlshift-test)
+
+  ADD_EXECUTABLE(s32-vlshiftc-test test/s32-vlshiftc.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vlshiftc-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vlshiftc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vlshiftc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vlshiftc-test COMMAND s32-vlshiftc-test)
 
   ADD_EXECUTABLE(f16-vcmul-test test/f16-vcmul.cc)
   SET_TARGET_PROPERTIES(f16-vcmul-test PROPERTIES CXX_EXTENSIONS YES)

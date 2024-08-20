@@ -23,6 +23,7 @@ class VBinaryMicrokernelTester {
     Add,
     CopySign,
     Div,
+    LShift,
     Max,
     Min,
     Mul,
