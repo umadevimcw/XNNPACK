@@ -10,6 +10,7 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "xnnpack/common.h"
 
@@ -28,15 +29,11 @@ typedef int16_t xnn_simd_s16_t;
 // Bitwise operations
 static XNN_INLINE xnn_simd_s16_t xnn_clz_s16(xnn_simd_s16_t a) {
   xnn_simd_s16_t clz = 0;
-  if (a == 0) {
-    clz = 16;
-  } else if (a < 0) {
-    clz = 0;
-  } else {
-    // float af = (float)a;
-    // int exponent = ((a >> 23) & 0xFF) - 127;
-    // clz = 15 - exponent;
-    clz = int16_t(__builtin_clz(a) - 16);
+  if (a == 0) return 16;
+  if (a < 0) return 0;
+  while ((a & 0x8000) == 0) {
+    clz++;
+    a <<= 1;
   }
   return clz;
 }

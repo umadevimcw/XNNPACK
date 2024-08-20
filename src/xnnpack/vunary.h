@@ -1613,6 +1613,32 @@ DECLARE_S32_VCLZ_UKERNEL_FUNCTION(xnn_s32_vclz_ukernel__wasmsimd_u8)
 DECLARE_S32_VCLZ_UKERNEL_FUNCTION(xnn_s32_vclz_ukernel__wasmsimd_u12)
 DECLARE_S32_VCLZ_UKERNEL_FUNCTION(xnn_s32_vclz_ukernel__wasmsimd_u16)
 
+#define DECLARE_S16_VCLZ_UKERNEL_FUNCTION(fn_name)                  \
+  XNN_INTERNAL void fn_name(size_t n, const int16_t* x, int16_t* y, \
+                            const union xnn_s16_default_params      \
+                                params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__avx2_u8)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__avx2_u16)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__avx2_u24)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__avx2_u32)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__avx512bw_u16)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__avx512bw_u32)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__avx512bw_u48)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__avx512bw_u64)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__neon_u4)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__neon_u8)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__neon_u12)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__neon_u16)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__scalar_u1)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__scalar_u2)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__scalar_u4)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__scalar_u8)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__sse41_u4)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__sse41_u8)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__sse41_u12)
+DECLARE_S16_VCLZ_UKERNEL_FUNCTION(xnn_s16_vclz_ukernel__sse41_u16)
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

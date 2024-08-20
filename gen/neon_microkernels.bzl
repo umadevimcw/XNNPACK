@@ -853,6 +853,7 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/s16-rmaxabs/gen/s16-rmaxabs-neon-x16.c",
     "src/s16-rmaxabs/gen/s16-rmaxabs-neon-x24.c",
     "src/s16-rmaxabs/gen/s16-rmaxabs-neon-x32.c",
+    "src/s16-vclz/gen/s16-vclz-neon.c",
     "src/s16-window/gen/s16-window-neon-u8.c",
     "src/s16-window/gen/s16-window-neon-u16.c",
     "src/s16-window/gen/s16-window-neon-u24.c",

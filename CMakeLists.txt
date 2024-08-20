@@ -3480,6 +3480,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(s8-vclamp-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME s8-vclamp-test COMMAND s8-vclamp-test)
 
+  ADD_EXECUTABLE(s16-vclz-test test/s16-vclz.cc)
+  TARGET_INCLUDE_DIRECTORIES(s16-vclz-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s16-vclz-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
+  TARGET_LINK_LIBRARIES(s16-vclz-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s16-vclz-test COMMAND s16-vclz-test)
+
   ADD_EXECUTABLE(s32-vclz-test test/s32-vclz.cc)
   TARGET_INCLUDE_DIRECTORIES(s32-vclz-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(s32-vclz-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)

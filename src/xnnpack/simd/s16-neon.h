@@ -28,7 +28,7 @@ typedef int16x8_t xnn_simd_s16_t;
 // Bitwise operations
 
 static XNN_INLINE xnn_simd_s16_t xnn_clz_s16(xnn_simd_s16_t a) {
-  return vclz_s16(a);
+  return vclzq_s16(a);
 }
 
 // Load/store operations.
