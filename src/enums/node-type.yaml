@@ -79,6 +79,8 @@
   string: "Log"
 - name: xnn_node_type_leaky_relu
   string: "Leaky ReLU"
+- name: xnn_node_type_lshift
+  string: "Left Shift"
 - name: xnn_node_type_max_pooling_2d
   string: "Max Pooling 2D"
 - name: xnn_node_type_maximum2

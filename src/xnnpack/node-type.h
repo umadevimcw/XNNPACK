@@ -54,6 +54,7 @@ enum xnn_node_type {
   xnn_node_type_hardswish,
   xnn_node_type_log,
   xnn_node_type_leaky_relu,
+  xnn_node_type_lshift,
   xnn_node_type_max_pooling_2d,
   xnn_node_type_maximum2,
   xnn_node_type_minimum2,

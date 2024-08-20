@@ -399,7 +399,8 @@ SET(SUBGRAPH_SRCS
   src/subgraph/hardswish.c
   src/subgraph/leaky-relu.c
   src/subgraph/log.c
-    src/subgraph/max-pooling-2d.c
+  src/subgraph/lshift.c
+  src/subgraph/max-pooling-2d.c
   src/subgraph/maximum2.c
   src/subgraph/minimum2.c
   src/subgraph/multiply2.c
@@ -1560,7 +1561,7 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(lshift-nd-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(lshift-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME lshift-nd-test COMMAND lshift-nd-test)
-    
+
     ADD_EXECUTABLE(max-pooling-nhwc-test test/max-pooling-nhwc.cc)
     TARGET_INCLUDE_DIRECTORIES(max-pooling-nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(max-pooling-nhwc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
@@ -1936,6 +1937,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(log-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main fp16)
     ADD_TEST(NAME log-test COMMAND log-test)
 
+    ADD_EXECUTABLE(lshift-test test/lshift.cc)
+    TARGET_INCLUDE_DIRECTORIES(lshift-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(lshift-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME lshift-test COMMAND lshift-test)
+    
     ADD_EXECUTABLE(max-pooling-2d-test test/max-pooling-2d.cc)
     TARGET_INCLUDE_DIRECTORIES(max-pooling-2d-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(max-pooling-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)

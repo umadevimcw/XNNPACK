@@ -2050,6 +2050,7 @@ xnnpack_unit_test(
     "add2",
     "copysign",
     "divide2",
+    "lshift",
     "maximum2",
     "minimum2",
     "multiply2",
