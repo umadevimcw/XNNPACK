@@ -508,19 +508,19 @@ static void init_s32_vlshift_config(void) {
     if (hardware_config->use_arm_neon) {
       s32_vlshift_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshift_ukernel__neon_u8;
       s32_vlshift_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__neon_u8;
-      s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__neon_u8;
+      s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vrlshiftc_ukernel__neon_u8;
       s32_vlshift_config.linear.element_tile = 8;
     }
     else if (!XNN_PLATFORM_MOBILE) {
       s32_vlshift_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshift_ukernel__scalar_u2;
       s32_vlshift_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__scalar_u2;
-      s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__scalar_u2;
+      s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vrlshiftc_ukernel__scalar_u2;
       s32_vlshift_config.linear.element_tile = 2;
     }
   #elif XNN_ARCH_ARM64
     s32_vlshift_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshift_ukernel__neon_u8;
     s32_vlshift_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__neon_u8;
-    s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__neon_u8;
+    s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vrlshiftc_ukernel__neon_u8;
     s32_vlshift_config.linear.element_tile = 8;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -528,30 +528,30 @@ static void init_s32_vlshift_config(void) {
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       s32_vlshift_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshift_ukernel__avx512f_u32;
       s32_vlshift_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__avx512f_u32;
-      s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__avx512f_u32;
+      s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vrlshiftc_ukernel__avx512f_u32;
       s32_vlshift_config.linear.element_tile = 32;
     }
     else if (hardware_config->use_x86_avx2) {
       s32_vlshift_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshift_ukernel__avx2_u16;
       s32_vlshift_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__avx2_u16;
-      s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__avx2_u16;
+      s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vrlshiftc_ukernel__avx2_u16;
       s32_vlshift_config.linear.element_tile = 16;
     }
     else {
       s32_vlshift_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshift_ukernel__sse41_u8;
       s32_vlshift_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__sse41_u8;
-      s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__sse41_u8;
+      s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vrlshiftc_ukernel__sse41_u8;
       s32_vlshift_config.linear.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     s32_vlshift_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshift_ukernel__wasmsimd_u16;
     s32_vlshift_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__wasmsimd_u16;
-    s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__wasmsimd_u16;
+    s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vrlshiftc_ukernel__wasmsimd_u16;
     s32_vlshift_config.linear.element_tile = 16;
   #else
     s32_vlshift_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshift_ukernel__scalar_u2;
     s32_vlshift_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__scalar_u2;
-    s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vlshiftc_ukernel__scalar_u2;
+    s32_vlshift_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vrlshiftc_ukernel__scalar_u2;
     s32_vlshift_config.linear.element_tile = 2;
   #endif
 }

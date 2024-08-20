@@ -190,6 +190,7 @@ tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/s3
 
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/s32-vlshift.yaml   --output test/s32-vlshift.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/s32-vlshiftc.yaml    --output test/s32-vlshiftc.cc &
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/s32-vrlshiftc.yaml    --output test/s32-vrlshiftc.cc &
 
 ### Tests for VUnary micro-kernels
 tools/generate-vunary-test.py --spec test/bf16-vabs.yaml --output test/bf16-vabs.cc &

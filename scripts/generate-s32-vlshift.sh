@@ -20,4 +20,12 @@ tools/xngen src/s32-vlshift/s32-vlshiftc.c.in -D ARCH=neon -D BATCH_TILES=4,8,12
 tools/xngen src/s32-vlshift/s32-vlshiftc.c.in -D ARCH=avx2 -D BATCH_TILES=8,16,24,32  -o src/s32-vlshift/gen/s32-vlshiftc-avx2.c &
 tools/xngen src/s32-vlshift/s32-vlshiftc.c.in -D ARCH=avx512f -D BATCH_TILES=16,32,48,64  -o src/s32-vlshift/gen/s32-vlshiftc-avx512f.c &
 
+##################################### SIMD VRLSHIFTC #####################################
+tools/xngen src/s32-vlshift/s32-vrlshiftc.c.in -D ARCH=scalar -D BATCH_TILES=1,2,4,8  -o src/s32-vlshift/gen/s32-vrlshiftc-scalar.c &
+tools/xngen src/s32-vlshift/s32-vrlshiftc.c.in -D ARCH=sse41 -D BATCH_TILES=4,8,12,16  -o src/s32-vlshift/gen/s32-vrlshiftc-sse41.c &
+tools/xngen src/s32-vlshift/s32-vrlshiftc.c.in -D ARCH=wasmsimd -D BATCH_TILES=4,8,12,16  -o src/s32-vlshift/gen/s32-vrlshiftc-wasmsimd.c &
+tools/xngen src/s32-vlshift/s32-vrlshiftc.c.in -D ARCH=neon -D BATCH_TILES=4,8,12,16  -o src/s32-vlshift/gen/s32-vrlshiftc-neon.c &
+tools/xngen src/s32-vlshift/s32-vrlshiftc.c.in -D ARCH=avx2 -D BATCH_TILES=8,16,24,32  -o src/s32-vlshift/gen/s32-vrlshiftc-avx2.c &
+tools/xngen src/s32-vlshift/s32-vrlshiftc.c.in -D ARCH=avx512f -D BATCH_TILES=16,32,48,64  -o src/s32-vlshift/gen/s32-vrlshiftc-avx512f.c &
+
 wait

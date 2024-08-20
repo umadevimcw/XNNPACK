@@ -25,6 +25,7 @@ class VBinaryCMicrokernelTester {
     DivC,
     RDivC,
     LShiftC,
+    RLShiftC,
     MaxC,
     MinC,
     MulC,
