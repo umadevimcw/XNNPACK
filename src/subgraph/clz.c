@@ -41,6 +41,9 @@ static enum xnn_status create_clz_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
+    case xnn_compute_type_s16:
+      status = xnn_create_clz_nc_s16(node->flags, &opdata->operator_objects[0]);
+      break;
     default:
       XNN_UNREACHABLE;
   }
@@ -62,13 +65,18 @@ static enum xnn_status reshape_clz_operator(
   enum xnn_status status = xnn_status_invalid_state;
 
   switch (opdata->operator_objects[0]->type) {
-
     case xnn_operator_type_clz_nc_s32:
       status = xnn_reshape_clz_nc_s32(
         opdata->operator_objects[0],
         batch_size,
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         threadpool);
+      break;
+    case xnn_operator_type_clz_nc_s16:
+      status = xnn_reshape_clz_nc_s16(
+          opdata->operator_objects[0], batch_size, channel_dim /* channels */,
+          channel_dim /* input stride */, channel_dim /* output stride */,
+          threadpool);
       break;
     default:
       XNN_UNREACHABLE;
@@ -107,6 +115,9 @@ static enum xnn_status setup_clz_operator(
         opdata->operator_objects[0],
         input_data,
         output_data);
+    case xnn_operator_type_clz_nc_s16:
+      return xnn_setup_clz_nc_s16(opdata->operator_objects[0], input_data,
+                                  output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -137,6 +148,8 @@ enum xnn_status xnn_define_clz(
   switch (input_value->datatype) {
     case xnn_datatype_int32:
       break;
+    case xnn_datatype_int16:
+      break;
     default:
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -160,6 +173,9 @@ enum xnn_status xnn_define_clz(
   switch (output_value->datatype) {
     case xnn_datatype_int32:
       compute_type = xnn_compute_type_s32;
+      break;
+    case xnn_datatype_int16:
+      compute_type = xnn_compute_type_s16;
       break;
     default:
       xnn_log_error(
