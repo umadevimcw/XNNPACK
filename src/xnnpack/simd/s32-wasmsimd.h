@@ -41,6 +41,34 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return wasm_i32x4_min(a, b);
 }
 
+static XNN_INLINE xnn_simd_s32_t xnn_rem_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  v128_t temp = a;
+  v128_t low_a = wasm_f64x2_convert_low_i32x4(a);
+  v128_t high_a =
+      wasm_i32x4_replace_lane(temp, 0, wasm_i32x4_extract_lane(a, 2));
+  v128_t high_a =
+      wasm_i32x4_replace_lane(temp, 1, wasm_i32x4_extract_lane(a, 3));
+  v128_t high_a = wasm_f64x2_convert_low_i32x4(temp);
+  temp = b;
+  v128_t low_b = wasm_f64x2_convert_low_i32x4(b);
+  v128_t high_b =
+      wasm_i32x4_replace_lane(temp, 0, wasm_i32x4_extract_lane(b, 2));
+  v128_t high_b =
+      wasm_i32x4_replace_lane(temp, 1, wasm_i32x4_extract_lane(b, 3));
+  v128_t high_b = wasm_f64x2_convert_low_i32x4(temp);
+
+  v128_t quotient_low = wasm_f64x2_div(low_a, low_b);
+  v128_t quotient_high = wasm_f64x2_div(high_a, high_b);
+
+  v128_t quotient =
+      wasm_i32x4_make((int32_t)wasm_f64x2_extract_lane(quotient_low, 0),
+                      (int32_t)wasm_f64x2_extract_lane(quotient_low, 1),
+                      (int32_t)wasm_f64x2_extract_lane(quotient_high, 0),
+                      (int32_t)wasm_f64x2_extract_lane(quotient_high, 1));
+  return wasm_i32x4_sub(a, wasm_i32x4_mul(quotient, b));
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {

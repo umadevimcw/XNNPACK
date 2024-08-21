@@ -374,5 +374,8 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/s8-vclamp/s8-vclamp-sse41-u64.c
   src/s32-vmul/gen/s32-vmul-sse41.c
   src/s32-vmul/gen/s32-vmulc-sse41.c
+  src/s32-vrem/gen/s32-vrem-sse41.c
+  src/s32-vrem/gen/s32-vremc-sse41.c
+  src/s32-vrem/gen/s32-vrremc-sse41.c
   src/u8-ibilinear/gen/u8-ibilinear-sse41-c8.c
   src/u8-ibilinear/gen/u8-ibilinear-sse41-c16.c)

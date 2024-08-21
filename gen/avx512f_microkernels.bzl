@@ -274,6 +274,9 @@ ALL_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-vunary/gen/f32-vsqr-avx512f.c",
     "src/s32-vmul/gen/s32-vmul-avx512f.c",
     "src/s32-vmul/gen/s32-vmulc-avx512f.c",
+    "src/s32-vrem/gen/s32-vrem-avx512f.c",
+    "src/s32-vrem/gen/s32-vremc-avx512f.c",
+    "src/s32-vrem/gen/s32-vrremc-avx512f.c",
     "src/x32-packw/gen/x32-packw-x16-gemm-goi-avx512f-u4-prfm.c",
     "src/x32-packw/gen/x32-packw-x16-gemm-goi-avx512f-u4.c",
 ]

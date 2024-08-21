@@ -320,7 +320,7 @@ void VBinaryCMicrokernelTester::Test(
   std::uniform_int_distribution<int32_t> s32dist(-100000, 100000);
 
   std::vector<int32_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
-  const int32_t b = s32dist(rng);
+  int32_t b = s32dist(rng);
   std::vector<int32_t> y(batch_size() +
                        (inplace() ? XNN_EXTRA_BYTES / sizeof(int32_t) : 0));
   std::vector<int32_t> y_ref(batch_size());
@@ -331,10 +331,10 @@ void VBinaryCMicrokernelTester::Test(
     } else {
       std::fill(y.begin(), y.end(), INT_MAX);
     }
-    const int32_t* a_data = inplace() ? y.data() : a.data();
-
+    int32_t* a_data = inplace() ? y.data() : a.data();
 
     // Compute reference results.
+    int q;
     for (size_t i = 0; i < batch_size(); i++) {
         switch (op_type) {
         case OpType::AddC:
@@ -361,6 +361,16 @@ void VBinaryCMicrokernelTester::Test(
         case OpType::MulC:
           // Overflow is the expected behaviour
           y_ref[i] = ((((int64_t) a_data[i] * (int64_t) b) << 32) >> 32);
+          break;
+        case OpType::RemC:
+          if (b == 0) b = 1;
+          q = a_data[i] / b;
+          y_ref[i] = a_data[i] - q * b;
+          break;
+        case OpType::RRemC:
+          if (a_data[i] == 0) a_data[i] = 1;
+          q = b / a_data[i];
+          y_ref[i] = b - q * a_data[i];
           break;
         case OpType::SqrDiffC: {
           const int32_t diff = a_data[i] - b;

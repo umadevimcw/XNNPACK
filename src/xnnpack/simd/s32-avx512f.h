@@ -42,6 +42,22 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return _mm512_min_epi32(a, b);
 }
 
+static XNN_INLINE xnn_simd_s32_t xnn_rem_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  __m512d low_a = _mm512_cvtepi32_pd(_mm512_extracti64x4_epi64(a, 0));
+  __m512d high_a = _mm512_cvtepi32_pd(_mm512_extracti64x4_epi64(a, 1));
+  __m512d low_b = _mm512_cvtepi32_pd(_mm512_extracti64x4_epi64(b, 0));
+  __m512d high_b = _mm512_cvtepi32_pd(_mm512_extracti64x4_epi64(b, 1));
+
+  __m512d quotient_low = _mm512_div_pd(low_a, low_b);
+  __m512d quotient_high = _mm512_div_pd(high_a, high_b);
+
+  xnn_simd_s32_t quotient = _mm512_inserti64x4(
+      _mm512_castsi256_si512(_mm512_cvttpd_epi32(quotient_low)),
+      _mm512_cvttpd_epi32(quotient_high), 1);
+  return _mm512_sub_epi32(a, _mm512_mullo_epi32(quotient, b));
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {

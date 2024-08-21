@@ -306,9 +306,10 @@ void VBinaryMicrokernelTester::Test(
       std::fill(y.begin(), y.end(), INT_MAX);
     }
     const int32_t* a_data = inplace_a() ? y.data() : a.data();
-    const int32_t* b_data = inplace_b() ? y.data() : b.data();
+    int32_t* b_data = inplace_b() ? y.data() : b.data();
 
     // Compute reference results.
+    int q;
     for (size_t i = 0; i < batch_size(); i++) {
         switch (op_type) {
         case OpType::Add:
@@ -329,6 +330,11 @@ void VBinaryMicrokernelTester::Test(
         case OpType::Mul:
           // Overflow is the expected behaviour
           y_ref[i] = ((((int64_t) a_data[i] * (int64_t) b_data[i]) << 32) >> 32);
+          break;
+        case OpType::Rem:
+          if (b_data[i] == 0) b_data[i] = 1;
+          q = a_data[i] / b_data[i];
+          y_ref[i] = a_data[i] - q * b_data[i];
           break;
         case OpType::SqrDiff: {
           const int32_t diff = a_data[i] - b_data[i];

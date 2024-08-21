@@ -11,6 +11,7 @@
 #include <smmintrin.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/unaligned.h"
@@ -39,6 +40,21 @@ static XNN_INLINE xnn_simd_s32_t xnn_max_s32(xnn_simd_s32_t a,
 static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
                                              xnn_simd_s32_t b) {
   return _mm_min_epi32(a, b);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_rem_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  __m128d low_a = _mm_cvtepi32_pd(a);
+  __m128d high_a = _mm_cvtepi32_pd(_mm_unpackhi_epi64(a, a));
+  __m128d low_b = _mm_cvtepi32_pd(b);
+  __m128d high_b = _mm_cvtepi32_pd(_mm_unpackhi_epi64(b, b));
+
+  __m128d quotient_low = _mm_div_pd(low_a, low_b);
+  __m128d quotient_high = _mm_div_pd(high_a, high_b);
+
+  xnn_simd_s32_t quotient = _mm_unpacklo_epi64(_mm_cvttpd_epi32(quotient_low),
+                                               _mm_cvttpd_epi32(quotient_high));
+  return _mm_sub_epi32(a, _mm_mullo_epi32(quotient, b));
 }
 
 // Load/store operations.
