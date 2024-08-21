@@ -31,42 +31,52 @@ static const int32_t mask_table_avx_s32[14] = {-1, -1, -1, -1, -1, -1, -1,
 
 // Bitwise Operations
 
-static XNN_INLINE xnn_simd_s16_t xnn_clz_16(xnn_simd_s16_t a) {
-  __m128i shuffled_a = _mm_shufflehi_epi16(a, _MM_SHUFFLE(2, 0, 3, 1));
-  __m128i shuffled_b = _mm_shufflehi_epi16(a, _MM_SHUFFLE(3, 1, 2, 0));
+static XNN_INLINE xnn_simd_s16_t xnn_clz_s16(xnn_simd_s16_t a) {
+  __m128i lowi = _mm256_extracti128_si256(a, 0);
+  __m128i highi = _mm256_extracti128_si256(a, 1);
 
-  __m128i ah = _mm_unpackhi_epi16(shuffled_b, shuffled_a);
+  __m256i low_32 = _mm256_cvtepi16_epi32(lowi);
+  __m256i high_32 = _mm256_cvtepi16_epi32(highi);
 
-  xnn_simd_s16_t low_half = _mm_cvtepi16_epi32(a);
-  xnn_simd_s16_t high_half = _mm_cvtepi16_epi32(ah);
+  __m256 low = _mm256_cvtepi32_ps((low_32));
+  __m256 high = _mm256_cvtepi32_ps((high_32));
+  xnn_simd_s16_t low_a = _mm256_castps_si256(low);
+  xnn_simd_s16_t high_a = _mm256_castps_si256(high);
 
-  __m128 low = _mm_cvtepi32_ps(low_half);
-  __m128 high = _mm_cvtepi32_ps(high_half);
+  xnn_simd_s16_t shift_low = _mm256_srli_epi32(low_a, 23);
+  xnn_simd_s16_t shift_high = _mm256_srli_epi32(high_a, 23);
 
-  xnn_simd_s16_t low_a = _mm_castps_si128(low);
-  xnn_simd_s16_t high_a = _mm_castps_si128(high);
 
-  xnn_simd_s16_t shift_low = _mm_srli_epi32(low_a, 23);
-  xnn_simd_s16_t shift_high = _mm_srli_epi32(high_a, 23);
+  xnn_simd_s16_t exponent =  _mm256_set_epi16(_mm256_extract_epi16(shift_high,14),
+                      _mm256_extract_epi16(shift_high, 12),
+                      _mm256_extract_epi16(shift_high, 10),
+                      _mm256_extract_epi16(shift_high, 8),
+                      _mm256_extract_epi16(shift_high, 6),
+                      _mm256_extract_epi16(shift_high, 4),
+                      _mm256_extract_epi16(shift_high, 2),
+                      _mm256_extract_epi16(shift_high, 0),
+                      _mm256_extract_epi16(shift_low, 14),
+                      _mm256_extract_epi16(shift_low, 12),
+                      _mm256_extract_epi16(shift_low, 10),
+                      _mm256_extract_epi16(shift_low, 8),
+                      _mm256_extract_epi16(shift_low, 6),
+                      _mm256_extract_epi16(shift_low, 4),
+                      _mm256_extract_epi16(shift_low, 2),
+                      _mm256_extract_epi16(shift_low, 0));
 
-  xnn_simd_s16_t exponent = _mm_set_epi16(
-      (_mm_extract_epi16(shift_high, 6)), (_mm_extract_epi16(shift_high, 4)),
-      (_mm_extract_epi16(shift_high, 2)), (_mm_extract_epi16(shift_high, 0)),
-      (_mm_extract_epi16(shift_low, 6)), (_mm_extract_epi16(shift_low, 4)),
-      (_mm_extract_epi16(shift_low, 2)), (_mm_extract_epi16(shift_low, 0)));
+  exponent = _mm256_and_si256(exponent, _mm256_set1_epi16(0xFF));
 
-  exponent = _mm_and_si128(exponent, _mm_set1_epi16(0xFF));
-  xnn_simd_s16_t result = _mm_sub_epi16(
-      _mm_set1_epi16(15), _mm_sub_epi16(exponent, _mm_set1_epi16(127)));
+  xnn_simd_s16_t result =
+      _mm256_sub_epi16(_mm256_set1_epi16(15),
+                       _mm256_sub_epi16(exponent, _mm256_set1_epi16(127)));
+  xnn_simd_s16_t zero = _mm256_setzero_si256();
+  xnn_simd_s16_t mask = _mm256_cmpgt_epi16(zero, a);
+  result = _mm256_andnot_si256(mask, result);
 
-  xnn_simd_s16_t zero = _mm_setzero_si128();
-  xnn_simd_s16_t mask = _mm_cmpgt_epi16(zero, a);
-  result = _mm_andnot_si128(mask, result);
+  xnn_simd_s16_t sixteen = _mm256_set1_epi16(16);
+  xnn_simd_s16_t maskz = _mm256_cmpeq_epi16(a, zero);
 
-  xnn_simd_s16_t sixteen = _mm_set1_epi16(16);
-  xnn_simd_s16_t maskz = _mm_cmpeq_epi16(a, zero);
-
-  result = _mm_blendv_epi8(result, sixteen, maskz);
+  result = _mm256_blendv_epi8(result, sixteen, maskz);
   return result;
 }
 // Load/store operations.
