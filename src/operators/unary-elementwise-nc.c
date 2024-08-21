@@ -490,6 +490,22 @@ enum xnn_status xnn_create_clamp_nc_u8(
     xnn_operator_type_clamp_nc_u8, clamp_op_out);
 }
 
+enum xnn_status xnn_create_clz_nc_s16(uint32_t flags,
+                                      xnn_operator_t* clz_op_out) {
+  const struct xnn_unary_elementwise_config* s16_clz_config =
+      xnn_init_s16_clz_config();
+  assert(s16_clz_config != NULL);
+
+  union xnn_s16_default_params params;
+  if XNN_LIKELY (s16_clz_config != NULL &&
+                s16_clz_config->init.s16_default != NULL) {
+    s16_clz_config->init.s16_default(&params);
+  }
+  return create_unary_elementwise_nc(
+      flags, s16_clz_config, /*rminmax_config=*/NULL, &params, sizeof(params),
+      xnn_operator_type_clz_nc_s16, clz_op_out);
+}
+
 enum xnn_status xnn_create_clz_nc_s32(uint32_t flags,
                                       xnn_operator_t* clz_op_out) {
   const struct xnn_unary_elementwise_config* s32_clz_config =
@@ -498,7 +514,7 @@ enum xnn_status xnn_create_clz_nc_s32(uint32_t flags,
 
   union xnn_s32_default_params params;
   if XNN_LIKELY (s32_clz_config != NULL &&
-                 s32_clz_config->init.s32_default != NULL) {
+                s32_clz_config->init.s32_default != NULL) {
     s32_clz_config->init.s32_default(&params);
   }
   return create_unary_elementwise_nc(
@@ -1676,6 +1692,18 @@ enum xnn_status xnn_reshape_clamp_nc_u8(xnn_operator_t clamp_op,
       sizeof(clamp_op->params.u8_minmax), threadpool);
 }
 
+enum xnn_status xnn_reshape_clz_nc_s16(xnn_operator_t clz_op, size_t batch_size,
+                                       size_t channels, size_t input_stride,
+                                       size_t output_stride,
+                                       pthreadpool_t threadpool) {
+  return reshape_unary_elementwise_nc(
+      clz_op, xnn_operator_type_clz_nc_s16, batch_size, channels, input_stride,
+      output_stride,
+      /*log2_input_size=*/XNN_LOG2_SIZEOF_INT16_T,
+      /*log2_output_size=*/XNN_LOG2_SIZEOF_INT16_T, &clz_op->params.s16_default,
+      sizeof(clz_op->params.s16_default), threadpool);
+}
+
 enum xnn_status xnn_reshape_clz_nc_s32(xnn_operator_t clz_op, size_t batch_size,
                                        size_t channels, size_t input_stride,
                                        size_t output_stride,
@@ -2678,8 +2706,14 @@ enum xnn_status xnn_setup_clamp_nc_u8(
     input, output);
 }
 
+enum xnn_status xnn_setup_clz_nc_s16(xnn_operator_t clz_op,
+                                    const int16_t* input, int16_t* output) {
+  return setup_unary_elementwise_nc(clz_op, xnn_operator_type_clz_nc_s16, input,
+                                    output);
+}
+
 enum xnn_status xnn_setup_clz_nc_s32(xnn_operator_t clz_op,
-                                     const int32_t* input, int32_t* output) {
+                                    const int32_t* input, int32_t* output) {
   return setup_unary_elementwise_nc(clz_op, xnn_operator_type_clz_nc_s32, input,
                                     output);
 }

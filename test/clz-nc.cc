@@ -24,6 +24,8 @@ class ClzOperatorTester : public UnaryOperatorTester {
  public:
   ClzOperatorTester() : UnaryOperatorTester() {
     range_s32_ = {std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()};
+    range_s16_ = {std::numeric_limits<int16_t>::min(),
+                  std::numeric_limits<int16_t>::max()};
   }
 
  protected:
@@ -47,10 +49,27 @@ class ClzOperatorTester : public UnaryOperatorTester {
     }
     return clz;
   }
+  int16_t RefFunc(int16_t x) const override {
+    int16_t clz = 0;
+    int16_t value = x;
+    if (value == 0)
+      clz = 16;
+    else if (value < 0)
+      clz = 0;
+    else {
+      while ((value & 0x8000) == 0) {
+        clz++;
+        value <<= 1;
+      }
+    }
+    return clz;
+  }
 
   CREATE_OP_OVERRIDES_S32(clz);
+  CREATE_OP_OVERRIDES_S16(clz);
 };
 
 CREATE_UNARY_INT32_TESTS(S32, ClzOperatorTester);
+CREATE_UNARY_INT16_TESTS(S16, ClzOperatorTester);
 
 };  // namespace xnnpack

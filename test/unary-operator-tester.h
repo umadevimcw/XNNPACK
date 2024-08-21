@@ -159,6 +159,7 @@ class UnaryOperatorTester {
   virtual void TestQS8();
   virtual void TestQU8();
   virtual void TestS32();
+  virtual void TestS16();
 
  protected:
   UnaryOperatorTester() = default;
@@ -167,6 +168,7 @@ class UnaryOperatorTester {
   // this function with their own reference function.
   virtual float RefFunc(float x) const = 0;
   virtual int32_t RefFunc(int32_t x) const {return 0;}
+  virtual int16_t RefFunc(int16_t x) const { return 0; }
 
   // Computes the absolute tolerance for a reference value `y_ref`. Tests will
   // fail when `std::abs(y - y_ref) > AbsTol32(y_ref)`.
@@ -217,6 +219,12 @@ class UnaryOperatorTester {
     EXPECT_EQ(y_ref, y)
         << "at batch " << batch << " / " << batch_size() << ", channel "
         << channel << " / " << channels() << ", input " << input;
+  }
+  virtual void CheckResultS16(int16_t y, int16_t y_ref, size_t batch,
+                              size_t channel, int16_t input) const {
+    EXPECT_EQ(y_ref, y) << "at batch " << batch << " / " << batch_size()
+                        << ", channel " << channel << " / " << channels()
+                        << ", input " << input;
   }
 
   // Wrappers for the create/reshape/setup/run functions of the underlying `f32`
@@ -316,6 +324,23 @@ class UnaryOperatorTester {
     return xnn_status_invalid_parameter;
   }
 
+  // Wrappers for the create/reshape/setup/run functions of the underlying `s16`
+  // op, override these with calls to the actual op functions, e.g. using the
+  // `CREATE_OP_OVERRIDES_S16` macro defined below.
+  virtual xnn_status CreateOpS16(uint32_t flags, xnn_operator_t* op_out) const {
+    return xnn_status_invalid_parameter;
+  }
+  virtual xnn_status ReshapeOpS16(xnn_operator_t op, size_t batch_size,
+                                  size_t channels, size_t input_stride,
+                                  size_t output_stride,
+                                  pthreadpool_t threadpool) const {
+    return xnn_status_invalid_parameter;
+  }
+  virtual xnn_status SetupOpS16(xnn_operator_t op, const int16_t* input,
+                                int16_t* output) const {
+    return xnn_status_invalid_parameter;
+  }
+
   // Input ranges for the different type-dependent tests.
   std::pair<float, float> range_f32_ = {-10.0f, 10.0f};
   std::pair<float, float> range_f16_ = {-10.0f, 10.0f};
@@ -325,6 +350,8 @@ class UnaryOperatorTester {
       0, std::numeric_limits<uint8_t>::max()};
   std::pair<int32_t, int32_t> range_s32_ = {
       std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()};
+  std::pair<int16_t, int16_t> range_s16_ = {
+      std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()};
 
  private:
   size_t batch_size_ = 1;
@@ -494,6 +521,32 @@ class UnaryOperatorTester {
   CREATE_OP_CREATE_OVERRIDE_S32(op_name);  \
   CREATE_OP_RESHAPE_OVERRIDE_S32(op_name); \
   CREATE_OP_SETUP_OVERRIDE_S32(op_name);
+
+#define CREATE_OP_CREATE_OVERRIDE_S16(op_name)                   \
+  xnn_status CreateOpS16(uint32_t flags, xnn_operator_t* op_out) \
+      const override {                                           \
+    return xnn_create_##op_name##_nc_s16(flags, op_out);         \
+  }
+
+#define CREATE_OP_RESHAPE_OVERRIDE_S16(op_name)                             \
+  xnn_status ReshapeOpS16(xnn_operator_t op, size_t batch_size,             \
+                          size_t channels, size_t input_stride,             \
+                          size_t output_stride, pthreadpool_t threadpool)   \
+      const override {                                                      \
+    return xnn_reshape_##op_name##_nc_s16(                                  \
+        op, batch_size, channels, input_stride, output_stride, threadpool); \
+  }
+
+#define CREATE_OP_SETUP_OVERRIDE_S16(op_name)                    \
+  xnn_status SetupOpS16(xnn_operator_t op, const int16_t* input, \
+                        int16_t* output) const override {        \
+    return xnn_setup_##op_name##_nc_s16(op, input, output);      \
+  }
+
+#define CREATE_OP_OVERRIDES_S16(op_name)   \
+  CREATE_OP_CREATE_OVERRIDE_S16(op_name);  \
+  CREATE_OP_RESHAPE_OVERRIDE_S16(op_name); \
+  CREATE_OP_SETUP_OVERRIDE_S16(op_name);
 
 template <typename T>
 struct LoopLimits {
@@ -768,6 +821,21 @@ inline std::ostream& operator<<(std::ostream& os, UnaryOpTestParams params) {
       }),                                                                      \
       [](const testing::TestParamInfo<Tester##datatype::ParamType>& info) {    \
         return info.param.ToString();                                          \
+      });
+
+#define CREATE_UNARY_INT16_TESTS(datatype, Tester)                          \
+  CREATE_UNARY_TEST(datatype, Tester)                                       \
+  INSTANTIATE_TEST_SUITE_P(                                                 \
+      datatype, Tester##datatype,                                           \
+      testing::ValuesIn<UnaryOpTestParams>({                                \
+          UnaryOpTestParams::UnitBatch(),                                   \
+          UnaryOpTestParams::SmallBatch(),                                  \
+          UnaryOpTestParams::SmallBatch().InputStride(129),                 \
+          UnaryOpTestParams::SmallBatch().OutputStride(117),                \
+          UnaryOpTestParams::StridedBatch(),                                \
+      }),                                                                   \
+      [](const testing::TestParamInfo<Tester##datatype::ParamType>& info) { \
+        return info.param.ToString();                                       \
       });
 
 #define CREATE_UNARY_INT32_TESTS(datatype, Tester)                          \

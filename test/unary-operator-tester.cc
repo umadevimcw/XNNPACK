@@ -329,4 +329,53 @@ void UnaryOperatorTester::TestS32() {
   }
 }
 
+void UnaryOperatorTester::TestS16() {
+  xnnpack::ReplicableRandomDevice rng;
+  std::uniform_int_distribution<int16_t> s16dist(range_s16_.first,
+                                                 range_s16_.second);
+
+  std::vector<int16_t> input(XNN_EXTRA_BYTES / sizeof(float) +
+                             (batch_size() - 1) * input_stride() + channels());
+  std::vector<int16_t> output((batch_size() - 1) * output_stride() +
+                              channels());
+  std::vector<int16_t> output_ref(batch_size() * channels());
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(input.begin(), input.end(), [&]() { return s16dist(rng); });
+    std::fill(output.begin(), output.end(),
+              std::numeric_limits<int16_t>::min());
+
+    // Compute reference results.
+    for (size_t i = 0; i < batch_size(); i++) {
+      for (size_t c = 0; c < channels(); c++) {
+        output_ref[i * channels() + c] = RefFunc(input[i * input_stride() + c]);
+      }
+    }
+
+    // Create, setup, run, and destroy Square operator.
+    ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+    xnn_operator_t op = nullptr;
+    ASSERT_EQ(xnn_status_success, CreateOpS16(0, &op));
+    ASSERT_NE(nullptr, op);
+
+    // Smart pointer to automatically delete op.
+    std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+        op, xnn_delete_operator);
+    ASSERT_EQ(xnn_status_success,
+              ReshapeOpS16(op, batch_size(), channels(), input_stride(),
+                           output_stride(), /*threadpool=*/nullptr));
+
+    ASSERT_EQ(xnn_status_success, SetupOpS16(op, input.data(), output.data()));
+    ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
+
+    // Verify results.
+    for (size_t i = 0; i < batch_size(); i++) {
+      for (size_t c = 0; c < channels(); c++) {
+        const int32_t y = output[i * output_stride() + c];
+        const int32_t y_ref = output_ref[i * channels() + c];
+        CheckResultS16(y, y_ref, i, c, input[i * input_stride() + c]);
+      }
+    }
+  }
+}
+
 };  // namespace xnnpack

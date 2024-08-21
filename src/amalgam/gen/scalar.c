@@ -40,6 +40,7 @@
 #include "xnnpack/raddstoreexpminusmax.h"
 #include "xnnpack/reduce.h"
 #include "xnnpack/simd/f32-scalar.h"
+#include "xnnpack/simd/s16-scalar.h"
 #include "xnnpack/simd/s32-scalar.h"
 #include "xnnpack/spmm.h"
 #include "xnnpack/transpose.h"
@@ -33263,6 +33264,47 @@ void xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u1(
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
+  }
+}
+
+void xnn_s16_vclz_ukernel__scalar_u4(
+    size_t batch,
+    const int16_t* input,
+    int16_t* output,
+    const union xnn_s16_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s16 == 1);
+
+  for (; batch >= 4 * sizeof(int16_t); batch -= 4 * sizeof(int16_t)) {
+    xnn_simd_s16_t vin_0 = xnn_loadu_s16(input);
+    xnn_simd_s16_t vin_1 = xnn_loadu_s16(input + 1 * xnn_simd_size_s16);
+    xnn_simd_s16_t vin_2 = xnn_loadu_s16(input + 2 * xnn_simd_size_s16);
+    xnn_simd_s16_t vin_3 = xnn_loadu_s16(input + 3 * xnn_simd_size_s16);
+    input += 4;
+
+    xnn_simd_s16_t vy_0 = xnn_clz_s16(vin_0);
+    xnn_simd_s16_t vy_1 = xnn_clz_s16(vin_1);
+    xnn_simd_s16_t vy_2 = xnn_clz_s16(vin_2);
+    xnn_simd_s16_t vy_3 = xnn_clz_s16(vin_3);
+
+    xnn_storeu_s16(output, vy_0);
+    xnn_storeu_s16(output + 1 * xnn_simd_size_s16, vy_1);
+    xnn_storeu_s16(output + 2 * xnn_simd_size_s16, vy_2);
+    xnn_storeu_s16(output + 3 * xnn_simd_size_s16, vy_3);
+    output += 4;
+  }
+  for (; batch >= xnn_simd_bytes_s16; batch -= xnn_simd_bytes_s16) {
+    xnn_simd_s16_t vin = xnn_loadu_s16(input);
+    input += xnn_simd_size_s16;
+
+    xnn_simd_s16_t vy = xnn_clz_s16(vin);
+
+    xnn_storeu_s16(output, vy);
+    output += xnn_simd_size_s16;
   }
 }
 

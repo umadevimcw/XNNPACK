@@ -29,6 +29,7 @@
 #include "xnnpack/prefetch.h"
 #include "xnnpack/raddstoreexpminusmax.h"
 #include "xnnpack/simd/f32-avx2.h"
+#include "xnnpack/simd/s16-avx2.h"
 #include "xnnpack/simd/s32-avx2.h"
 #include "xnnpack/transpose.h"
 #include "xnnpack/unaligned.h"
@@ -15794,6 +15795,36 @@ void xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u16(
     vy = xnn_fmadd_f32(vexp, vln2, vy);
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
+  }
+}
+
+void xnn_s16_vclz_ukernel__avx2_u16(
+    size_t batch,
+    const int16_t* input,
+    int16_t* output,
+    const union xnn_s16_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s16 == 16);
+
+  for (; batch >= xnn_simd_bytes_s16; batch -= xnn_simd_bytes_s16) {
+    xnn_simd_s16_t vin = xnn_loadu_s16(input);
+    input += xnn_simd_size_s16;
+
+    xnn_simd_s16_t vy = xnn_clz_s16(vin);
+
+    xnn_storeu_s16(output, vy);
+    output += xnn_simd_size_s16;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    xnn_simd_s16_t vin = xnn_load_tail_s16(input, batch >> XNN_LOG2_SIZEOF_INT16_T);
+
+    xnn_simd_s16_t vy = xnn_clz_s16(vin);
+
+    xnn_store_tail_s16(output, vy, batch >> XNN_LOG2_SIZEOF_INT16_T);
   }
 }
 
