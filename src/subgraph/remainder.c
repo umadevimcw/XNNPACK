@@ -282,6 +282,8 @@ enum xnn_status xnn_define_remainder(
 
   node->type = xnn_node_type_remainder;
   node->compute_type = compute_type;
+  node->activation.output_min = output_min;
+  node->activation.output_max = output_max;
   node->num_inputs = 2;
   node->inputs[0] = input1_id;
   node->inputs[1] = input2_id;

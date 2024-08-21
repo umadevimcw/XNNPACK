@@ -87,10 +87,14 @@ static inline int16_t xnn_qs16_requantize_rem_fp32(
   int16_t min,
   int16_t max)
 {
-  int32_t q = (int32_t)((float)((int32_t)a - (int32_t)params.qs16_scalar.a_zero_point) * params.qs16_scalar.a_scale 
-                 / (float)((int32_t)b - (int32_t)params.qs16_scalar.b_zero_point) * params.qs16_scalar.b_scale); 
-  float input = (float)((int32_t)a - (int32_t)params.qs16_scalar.a_zero_point) * params.qs16_scalar.a_scale - q * 
-                 (float)((int32_t)b - (int32_t)params.qs16_scalar.b_zero_point) * params.qs16_scalar.b_scale;
+  float scaled_a =
+      (float)((int32_t)a - (int32_t)params.qs16_scalar.a_zero_point) *
+      params.qs16_scalar.a_scale;
+  float scaled_b =
+      (float)((int32_t)b - (int32_t)params.qs16_scalar.b_zero_point) *
+      params.qs16_scalar.b_scale;
+  int32_t q = (int32_t)(scaled_a / scaled_b);
+  float input = scaled_a - (float)q * scaled_b;
   int32_t scaled_input = (int32_t)(input * params.qs16_scalar.output_scale) + (int32_t)params.qs16_scalar.output_zero_point;
   scaled_input = (scaled_input > INT16_MAX)
                      ? INT16_MAX

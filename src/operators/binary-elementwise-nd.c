@@ -904,11 +904,13 @@ enum xnn_status xnn_create_remainder_nd_qs16(
   union xnn_qs16_rem_minmax_params params;
   union xnn_qs16_rem_minmax_params params2;
   assert(qs16_vrem_config->init.qs16_rem != NULL);
-  qs16_vrem_config->init.qs16_rem(&params, input1_zero_point, input2_zero_point,
-                                  input1_scale, input2_scale, 1 / output_scale, output_zero_point,output_min,output_max);
+  qs16_vrem_config->init.qs16_rem(
+      &params, input1_zero_point, input2_zero_point, input1_scale, input2_scale,
+      (1 / output_scale), output_zero_point, output_min, output_max);
   qs16_vrem_config->init.qs16_rem(&params2, input2_zero_point,
-                                  input1_zero_point, input1_scale, input2_scale, 1 / output_scale,
-                                  output_zero_point,output_min,output_max);
+                                  input1_zero_point, input1_scale, input2_scale,
+                                  (1 / output_scale), output_zero_point,
+                                  output_min, output_max);
 
   return create_binary_elementwise_nd(flags, &params, &params2, sizeof(params),
                                       xnn_operator_type_remainder_nd_qs16,

@@ -936,7 +936,7 @@ void VBinaryCMicrokernelTester::Test(
 
     // Compute reference results.
     switch (op_type) {
-      case OpType::RemC:
+      case OpType::RemC: {
         for (size_t i = 0; i < batch_size(); i++) {
           const float a_f =
               static_cast<float>(static_cast<int32_t>(a_data[i]) -
@@ -959,7 +959,8 @@ void VBinaryCMicrokernelTester::Test(
                                                   qmin_s16(), qmax_s16());
         }
         break;
-      case OpType::RRemC:
+      }
+      case OpType::RRemC: {
         for (size_t i = 0; i < batch_size(); i++) {
           const float a_f =
               static_cast<float>(static_cast<int32_t>(a_data[i]) -
@@ -982,6 +983,9 @@ void VBinaryCMicrokernelTester::Test(
                                                   qmin_s16(), qmax_s16());
         }
         break;
+      }
+      default:
+        break;
     }
 
     // Call optimized micro-kernel.
@@ -989,9 +993,8 @@ void VBinaryCMicrokernelTester::Test(
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
-      // EXPECT_EQ(static_cast<int32_t>(y[i]), static_cast<int32_t>(y_ref[i]))
-      //   << "at element " << i << " / " << batch_size()<<" , "<< a_data[i]<<"
-      //   , "<<b;
+      EXPECT_EQ(static_cast<int32_t>(y[i]), static_cast<int32_t>(y_ref[i]))
+          << "at element " << i << " / " << batch_size();
       EXPECT_NEAR(static_cast<int32_t>(y[i]), y_fp[i], 1.0f)
           << "at element " << i << " / " << batch_size();
     }
