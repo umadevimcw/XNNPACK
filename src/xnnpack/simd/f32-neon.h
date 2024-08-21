@@ -133,12 +133,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_rndnrtafz_f32(xnn_simd_f32_t a) {
-    // Extract the sign of each element
-    uint32x4_t sign_mask = vdupq_n_u32(0x80000000);  // Sign bit mask
-    uint32x4_t sign_bits = vreinterpretq_u32_f32(a);
-    uint32x4_t sign = vandq_u32(sign_bits, sign_mask);
-    
-    // Compute absolute value
     xnn_simd_f32_t abs_v = vabsq_f32(a);
 
     // Add 0.5 to the absolute values
@@ -148,14 +142,14 @@ static XNN_INLINE xnn_simd_f32_t xnn_rndnrtafz_f32(xnn_simd_f32_t a) {
     // Floor the result of (absolute value + 0.5)
     xnn_simd_f32_t floor_v = vrndmq_f32(abs_plus_half);  // Rounds towards -infinity
 
-    // Determine whether to round up or down
-    xnn_simd_f32_t half_subtracted = vsubq_f32(floor_v, half);
-    uint32x4_t cmp = vcltq_f32(abs_v, half_subtracted);
-    xnn_simd_f32_t rounded = vbslq_f32(cmp, floor_v, half_subtracted);
+    // Check if the original absolute value was exactly halfway
+    uint32x4_t is_half = vceqq_f32(abs_v, vsubq_f32(floor_v, half));
 
-    // Apply the sign back
-    uint32x4_t rounded_bits = vreinterpretq_u32_f32(rounded);
-    return vreinterpretq_f32_u32(veorq_u32(rounded_bits, sign));
+    // Adjust rounded value for ties away from zero
+    xnn_simd_f32_t rounded = vaddq_f32(floor_v, vcvtq_f32_u32(is_half));
+
+    // Reapply the original sign
+     return vbslq_f32(vcltzq_f32(a), vnegq_f32(rounded), rounded);
 }
 
 // Logical operations.
