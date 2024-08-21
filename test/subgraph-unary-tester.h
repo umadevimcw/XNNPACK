@@ -42,6 +42,9 @@ class UnaryTest : public ::testing::Test {
     f32dist = std::uniform_real_distribution<float>(0.01f, 1.0f);
     s32dist = std::uniform_int_distribution<int32_t>(
         std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max());
+    s16dist = std::uniform_int_distribution<int16_t>(
+        std::numeric_limits<int16_t>::min(),
+        std::numeric_limits<int16_t>::max());
     dims = RandomShape();
     AllocateInputsAndOutputs();
   };
@@ -83,6 +86,7 @@ class UnaryTest : public ::testing::Test {
   std::uniform_int_distribution<uint32_t> u32dist;
   std::uniform_real_distribution<float> f32dist;
   std::uniform_int_distribution<int32_t> s32dist;
+  std::uniform_int_distribution<int16_t> s16dist;
 
   std::vector<size_t> dims;
 
