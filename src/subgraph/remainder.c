@@ -38,6 +38,11 @@ static enum xnn_status create_remainder_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
+    case xnn_compute_type_s32:
+      status = xnn_create_remainder_nd_s32(
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
     default:
       XNN_UNREACHABLE;
   }
@@ -102,6 +107,15 @@ static enum xnn_status reshape_remainder_operator(
         opdata->shape2.dim,
         threadpool);
       break;
+    case xnn_operator_type_remainder_nd_s32:
+      status = xnn_reshape_remainder_nd_s32(
+        opdata->operator_objects[0],
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
+        threadpool);
+      break;
     default:
       XNN_UNREACHABLE;
   }
@@ -146,6 +160,10 @@ static enum xnn_status setup_remainder_operator(
       return xnn_setup_remainder_nd_f32(
         opdata->operator_objects[0],
         input1_data, input2_data, output_data);
+    case xnn_operator_type_remainder_nd_s32:
+      return xnn_setup_remainder_nd_s32(
+        opdata->operator_objects[0],
+        input1_data, input2_data, output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -178,6 +196,7 @@ enum xnn_status xnn_define_remainder(
 
   switch (input1_value->datatype) {
     case xnn_datatype_fp32:
+    case xnn_datatype_int32:
       break;
     default:
       xnn_log_error(
@@ -200,6 +219,7 @@ enum xnn_status xnn_define_remainder(
 
   switch (input2_value->datatype) {
     case xnn_datatype_fp32:
+    case xnn_datatype_int32:
       break;
     default:
       xnn_log_error(
@@ -224,6 +244,9 @@ enum xnn_status xnn_define_remainder(
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
+      break;
+    case xnn_datatype_int32:
+      compute_type = xnn_compute_type_s32;
       break;
     default:
       xnn_log_error(
