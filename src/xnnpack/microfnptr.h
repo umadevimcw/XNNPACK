@@ -2110,6 +2110,13 @@ typedef void (*xnn_f32_vbinary_ukernel_fn)(
     float* output,
     const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_s16_vbinary_ukernel_fn)(
+    size_t batch,
+    const int16_t* input_x,
+    const int16_t* input_y,
+    int16_t* output,
+    const union xnn_s16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_s32_vbinary_ukernel_fn)(
     size_t batch,
     const int32_t* input_x,
@@ -2358,6 +2365,14 @@ typedef void (*xnn_s16_rmaxabs_ukernel_fn)(
     size_t batch_size,
     const int16_t* x,
     uint16_t* y);
+
+// LEFTSHIFT: Vector LeftShift (S16 bit) elementwise
+typedef void (*xnn_s16_vlshift_ukernel_fn)(
+    size_t batch,
+    const int16_t* input_a,
+    const int16_t* input_b,
+    int16_t* output,
+    const union xnn_s16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_s16_window_ukernel_fn)(
     size_t rows,
@@ -2650,6 +2665,9 @@ typedef size_t (*xnn_init_f16_expminus_params_fn)(
 
 typedef size_t (*xnn_init_f32_expminus_params_fn)(
   union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef size_t (*xnn_init_s16_default_params_fn)(
+  union xnn_s16_default_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_s32_default_params_fn)(
   union xnn_s32_default_params params[XNN_MIN_ELEMENTS(1)]);

@@ -24,6 +24,10 @@ typedef int16_t xnn_simd_s16_t;
   static const xnn_simd_s16_t var = val;
 
 // Arithmetic operations.
+static XNN_INLINE xnn_simd_s16_t xnn_sllv_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return (b > 15 || b < 0) ? 0 : a << b;
+}
 
 static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t *ptr) { return *ptr; }
 

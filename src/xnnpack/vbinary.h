@@ -1280,6 +1280,59 @@ DECLARE_QS8_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs8_vmulc_minmax_fp32_ukernel__scal
 DECLARE_QS8_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_u2)
 DECLARE_QS8_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_u4)
 
+#define DECLARE_S16_VBINOP_UKERNEL_FUNCTION(fn_name)    \
+    XNN_INTERNAL void fn_name(                          \
+      size_t n,                                         \
+      const int16_t* a,                                 \
+      const int16_t* b,                                 \
+      int16_t* y,                                       \
+      const union xnn_s16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshift_ukernel__avx2_u16)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshift_ukernel__avx2_u32)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshift_ukernel__avx512bw_u32)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshift_ukernel__avx512bw_u64)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshift_ukernel__neon_u8)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshift_ukernel__neon_u16)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshift_ukernel__scalar_u1)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshift_ukernel__scalar_u2)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshift_ukernel__scalar_u4)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshift_ukernel__scalar_u8)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshift_ukernel__sse41_u8)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshift_ukernel__sse41_u16)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshift_ukernel__wasmsimd_u8)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshift_ukernel__wasmsimd_u16)
+
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshiftc_ukernel__avx2_u16)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshiftc_ukernel__avx2_u32)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshiftc_ukernel__avx512bw_u32)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshiftc_ukernel__avx512bw_u64)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshiftc_ukernel__neon_u8)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshiftc_ukernel__neon_u16)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshiftc_ukernel__scalar_u1)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshiftc_ukernel__scalar_u2)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshiftc_ukernel__scalar_u4)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshiftc_ukernel__scalar_u8)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshiftc_ukernel__sse41_u8)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshiftc_ukernel__sse41_u16)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshiftc_ukernel__wasmsimd_u8)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vlshiftc_ukernel__wasmsimd_u16)
+
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vrlshiftc_ukernel__avx2_u16)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vrlshiftc_ukernel__avx2_u32)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vrlshiftc_ukernel__avx512bw_u32)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vrlshiftc_ukernel__avx512bw_u64)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vrlshiftc_ukernel__neon_u8)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vrlshiftc_ukernel__neon_u16)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vrlshiftc_ukernel__scalar_u1)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vrlshiftc_ukernel__scalar_u2)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vrlshiftc_ukernel__scalar_u4)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vrlshiftc_ukernel__scalar_u8)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vrlshiftc_ukernel__sse41_u8)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vrlshiftc_ukernel__sse41_u16)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vrlshiftc_ukernel__wasmsimd_u8)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vrlshiftc_ukernel__wasmsimd_u16)
+
 
 #define DECLARE_S32_VBINOP_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                         \

@@ -24,6 +24,17 @@ typedef int16x8_t xnn_simd_s16_t;
 #define XNN_SIMD_CONST_S16(var, val) const int16x8_t var = vdupq_n_s16(val);
 
 // Arithmetic operations.
+static XNN_INLINE xnn_simd_s16_t xnn_sllv_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {  
+  xnn_simd_s16_t tmp = vcgezq_s16(b);
+  a = vandq_s16(a, tmp);
+  b = vandq_s16(b, tmp);
+  int32_t v = 16;
+  tmp = vcltq_s16(b, vld1q_dup_s16(&v));
+  a = vandq_s16(a, tmp);
+  b = vandq_s16(b, tmp);
+  return vshlq_s16(a, b);
+}
 
 // Load/store operations.
 static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t* ptr) {

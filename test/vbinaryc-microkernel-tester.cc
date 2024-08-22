@@ -303,6 +303,59 @@ void VBinaryCMicrokernelTester::Test(
 
 
 void VBinaryCMicrokernelTester::Test(
+    xnn_s16_vbinary_ukernel_fn vbinaryc, OpType op_type,
+    xnn_init_s16_default_params_fn init_params) const {
+  xnnpack::ReplicableRandomDevice rng;
+  std::uniform_int_distribution<int16_t> s16dist(INT16_MIN, INT16_MAX);
+
+  std::vector<int16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
+  const int16_t b = s16dist(rng);
+  std::vector<int16_t> y(batch_size() +
+                       (inplace() ? XNN_EXTRA_BYTES / sizeof(int16_t) : 0));
+  std::vector<int16_t> y_ref(batch_size());
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(a.begin(), a.end(), [&]() { return s16dist(rng);});
+    if (inplace()) {
+      std::generate(y.begin(), y.end(), [&]() { return s16dist(rng); });
+    } else {
+      std::fill(y.begin(), y.end(), INT_MAX);
+    }
+    const int16_t* a_data = inplace() ? y.data() : a.data();
+
+
+    // Compute reference results.
+    for (size_t i = 0; i < batch_size(); i++) {
+        switch (op_type) {
+        case OpType::LShiftC:
+          y_ref[i] = (b > 15 || b < 0) ? 0 : a_data[i] << b;
+          break;
+        case OpType::RLShiftC:
+          y_ref[i] = (a_data[i] > 15 || a_data[i] < 0) ? 0 : b << a_data[i];
+          break;
+        default:
+          break;
+      }
+    }
+
+    // Prepare parameters.
+    xnn_s16_default_params params;
+    if (init_params != nullptr) {
+      init_params(&params);
+    }
+
+    // Call optimized micro-kernel.
+    vbinaryc(batch_size() * sizeof(int16_t), a_data, &b, y.data(),
+            init_params != nullptr ? &params : nullptr);
+
+    // Verify results.
+    for (size_t i = 0; i < batch_size(); i++) {
+      EXPECT_EQ(y[i], y_ref[i])
+          << "at " << i << " / " << batch_size();
+    }
+  }
+}
+
+void VBinaryCMicrokernelTester::Test(
     xnn_s32_vbinary_ukernel_fn vbinaryc, OpType op_type,
     xnn_init_s32_default_params_fn init_params) const {
   xnnpack::ReplicableRandomDevice rng;

@@ -185,6 +185,10 @@ tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qs
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qu8-vmulc-minmax-fp32.yaml --output test/qu8-vmulc-minmax-fp32.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qu8-vmulc-minmax-rndnu.yaml --output test/qu8-vmulc-minmax-rndnu.cc &
 
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/s16-vlshift.yaml   --output test/s16-vlshift.cc &
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/s16-vlshiftc.yaml    --output test/s16-vlshiftc.cc &
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/s16-vrlshiftc.yaml    --output test/s16-vrlshiftc.cc &
+
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/s32-vmul.yaml   --output test/s32-vmul.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/s32-vmulc.yaml    --output test/s32-vmulc.cc &
 

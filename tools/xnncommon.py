@@ -81,6 +81,7 @@ _ISA_TO_ARCH_MAP = {
   "avx2": ["x86-32", "x86-64"],
   "avx512f": ["x86-32", "x86-64"],
   "avx512skx": ["x86-32", "x86-64"],
+  "avx512bw": ["x86-32", "x86-64"],
   "avx512vbmi": ["x86-32", "x86-64"],
   "avx512vnni": ["x86-32", "x86-64"],
   "avx512vnnigfni": ["x86-32", "x86-64"],
@@ -124,6 +125,7 @@ _ISA_TO_UTILCHECK_MAP = {
   "fma3": "CheckFMA3",
   "avx512f": "CheckAVX512F",
   "avx512skx": "CheckAVX512SKX",
+  "avx512bw": "CheckAVX512F",
   "avx512vbmi": "CheckAVX512VBMI",
   "avx512vnni": "CheckAVX512VNNI",
   "avx512vnnigfni": "CheckAVX512VNNIGFNI",
@@ -164,6 +166,7 @@ _ISA_TO_CHECK_MAP = {
   "fma3": "TEST_REQUIRES_X86_FMA3",
   "avx512f": "TEST_REQUIRES_X86_AVX512F",
   "avx512skx": "TEST_REQUIRES_X86_AVX512SKX",
+  "avx512bw": "TEST_REQUIRES_X86_AVX512F",
   "avx512vbmi": "TEST_REQUIRES_X86_AVX512VBMI",
   "avx512vnni": "TEST_REQUIRES_X86_AVX512VNNI",
   "avx512vnnigfni": "TEST_REQUIRES_X86_AVX512VNNIGFNI",
@@ -213,7 +216,7 @@ def generate_isa_utilcheck_macro(isa):
 def arch_to_macro(arch, isa):
   return _ARCH_TO_MACRO_MAP[arch]
 
-def postprocess_test_case(test_case, arch, isa, assembly=False):
+def postprocess_test_case(test_case, arch, isa, assembly=False, jit=False):
   test_case = _remove_duplicate_newlines(test_case)
   if arch:
     guard = " || ".join(arch_to_macro(a, isa) for a in arch)
@@ -222,10 +225,12 @@ def postprocess_test_case(test_case, arch, isa, assembly=False):
         guard = "%s && (%s)" % (_ISA_TO_MACRO_MAP[isa], guard)
       else:
         guard = "%s && %s" % (_ISA_TO_MACRO_MAP[isa], guard)
-    if assembly and "||" in guard:
+    if (assembly or jit) and "||" in guard:
       guard = '(' + guard + ')'
     if assembly:
       guard += " && XNN_ENABLE_ASSEMBLY"
+    if jit:
+      guard += " && XNN_PLATFORM_JIT"
     return "#if %s\n" % guard + _indent(test_case) + "\n" + \
       "#endif  // %s\n" % guard
   else:
@@ -240,6 +245,7 @@ _ISA_HIERARCHY = [
   "avx2",
   "avx512f",
   "avx512skx",
+  "avx512bw",
   "avx512vbmi",
   "avxvnni",
   "avx256skx",

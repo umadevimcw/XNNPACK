@@ -25,6 +25,24 @@ typedef __m128i xnn_simd_s16_t;
   const xnn_simd_s16_t v16 = _mm_set1_epi16(val);
 
 // Arithmetic operations.
+static XNN_INLINE xnn_simd_s16_t xnn_sllv_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  xnn_simd_s16_t tmp =  _mm_cmplt_epi16(b, _mm_set1_epi16(16));
+  a = _mm_and_si128(a, tmp);
+  b = _mm_and_si128(b, tmp);
+  tmp =  _mm_cmpgt_epi16(b, _mm_set1_epi16(-1));
+  a = _mm_and_si128(a, tmp);
+  b = _mm_and_si128(b, tmp);
+  a =  _mm_insert_epi16(a, (_mm_extract_epi16(a, 0) <<  _mm_extract_epi16(b, 0)), 0);
+  a =  _mm_insert_epi16(a, (_mm_extract_epi16(a, 1) <<  _mm_extract_epi16(b, 1)), 1);
+  a =  _mm_insert_epi16(a, (_mm_extract_epi16(a, 2) <<  _mm_extract_epi16(b, 2)), 2);
+  a =  _mm_insert_epi16(a, (_mm_extract_epi16(a, 3) <<  _mm_extract_epi16(b, 3)), 3);
+  a =  _mm_insert_epi16(a, (_mm_extract_epi16(a, 4) <<  _mm_extract_epi16(b, 4)), 4);
+  a =  _mm_insert_epi16(a, (_mm_extract_epi16(a, 5) <<  _mm_extract_epi16(b, 5)), 5);
+  a =  _mm_insert_epi16(a, (_mm_extract_epi16(a, 6) <<  _mm_extract_epi16(b, 6)), 6);
+  a =  _mm_insert_epi16(a, (_mm_extract_epi16(a, 7) <<  _mm_extract_epi16(b, 7)), 7);
+  return a;  
+}
 
 // Load/store operations.
 

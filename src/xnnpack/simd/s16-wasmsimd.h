@@ -25,6 +25,19 @@ typedef v128_t xnn_simd_s16_t;
   const xnn_simd_s16_t var = wasm_i16x8_splat(val);
 
 // Arithmetic operations.
+static XNN_INLINE xnn_simd_s16_t xnn_sllv_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  xnn_simd_s16_t tmp = wasm_i16x8_lt(b, wasm_i16x8_splat(16));
+  a = wasm_v128_and(a, tmp);
+  b = wasm_v128_and(b, tmp);
+  tmp = wasm_i16x8_ge(b, wasm_i16x8_splat(0));
+  a = wasm_v128_and(a, tmp);
+  b = wasm_v128_and(b, tmp);
+  for(int i = 0; i < 8; i++){
+    a = wasm_i16x8_replace_lane(a, i, (wasm_i16x8_extract_lane(a, i) << wasm_i16x8_extract_lane(b, i)));
+  }
+  return a;
+}
 
 // Load/store operations.
 

@@ -25,9 +25,26 @@ typedef __m256i xnn_simd_s16_t;
   const xnn_simd_s16_t var = _mm256_set1_epi16(val);
 
 // Mask table used for masked load/store operations.
-static const int32_t mask_table_avx_s32[14] = {-1, -1, -1, -1, -1, -1, -1,
-                                               0,  0,  0,  0,  0,  0,  0};
+static const int32_t mask_table_avx_s16[32] = {
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0};
+
 // Arithmetic operations.
+static XNN_INLINE xnn_simd_s16_t xnn_sllv_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  xnn_simd_s16_t tmp = _mm256_cmpgt_epi16(b, _mm256_set1_epi16(15));
+  a = _mm256_andnot_si256(tmp, a);
+  b = _mm256_andnot_si256(tmp, b);
+  xnn_simd_s16_t a_low = _mm256_unpacklo_epi16(a, _mm256_set1_epi16(0));
+  xnn_simd_s16_t a_high = _mm256_unpackhi_epi16(a, _mm256_set1_epi16(0));
+  xnn_simd_s16_t b_low = _mm256_unpacklo_epi16(b, _mm256_set1_epi16(0));
+  xnn_simd_s16_t b_high = _mm256_unpackhi_epi16(b, _mm256_set1_epi16(0));
+  a_low = _mm256_sllv_epi32(a_low, b_low);
+  a_high = _mm256_sllv_epi32(a_high, b_high);
+  a_low = _mm256_and_si256(a_low, _mm256_set1_epi32(0xFFFF));
+  a_high = _mm256_and_si256(a_high,_mm256_set1_epi32(0xFFFF));
+  return _mm256_hadd_epi16(a_low, a_high);
+}
 
 // Load/store operations.
 
@@ -66,7 +83,7 @@ xnn_load_tail_s16(const int16_t* input, size_t num_elements) XNN_OOB_READS {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_s16);
   const __m256i vmask = _mm256_loadu_si256(
-      (const __m256i*) ((uintptr_t) mask_table_avx_s32[7 ^ (num_elements>>1)]));
+      (const __m256i*) (&mask_table_avx_s16[16 - num_elements]));
   return _mm256_maskload_epi32((const int32_t*) input, vmask);
 }
 

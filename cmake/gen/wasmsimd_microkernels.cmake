@@ -1158,6 +1158,9 @@ SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-mul32-c16.c
   src/s8-maxpool/s8-maxpool-9p8x-minmax-wasmsimd-c16.c
   src/s8-vclamp/s8-vclamp-wasmsimd-u64.c
+  src/s16-vlshift/gen/s16-vlshift-wasmsimd.c
+  src/s16-vlshift/gen/s16-vlshiftc-wasmsimd.c
+  src/s16-vlshift/gen/s16-vrlshiftc-wasmsimd.c
   src/s32-vlshift/gen/s32-vlshift-wasmsimd.c
   src/s32-vlshift/gen/s32-vlshiftc-wasmsimd.c
   src/s32-vlshift/gen/s32-vrlshiftc-wasmsimd.c
