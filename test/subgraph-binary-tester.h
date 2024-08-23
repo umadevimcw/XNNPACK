@@ -126,6 +126,7 @@ template <typename T> class BinaryTest : public ::testing::Test {
   std::uniform_real_distribution<float> scale_dist;
   std::uniform_int_distribution<int32_t> i8dist;
   std::uniform_int_distribution<int32_t> u8dist;
+  std::uniform_int_distribution<int16_t> s16dist;
   std::uniform_int_distribution<int32_t> s32dist;
 
 

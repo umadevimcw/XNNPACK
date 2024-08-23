@@ -125,6 +125,7 @@ enum xnn_status xnn_define_tensor_value(
   switch (datatype) {
     case xnn_datatype_fp32:
     case xnn_datatype_fp16:
+    case xnn_datatype_int16:
     case xnn_datatype_int32:
       break;
     default:

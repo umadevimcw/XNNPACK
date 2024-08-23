@@ -44,6 +44,9 @@ static enum xnn_status create_lshift_operator(
 
   enum xnn_status status;
   switch (node->compute_type) {
+    case xnn_compute_type_s16:
+      status = xnn_create_lshift_nd_s16(node->flags, &opdata->operator_objects[0]);
+      break;
     case xnn_compute_type_s32:
       status = xnn_create_lshift_nd_s32(node->flags, &opdata->operator_objects[0]);
       break;
@@ -102,6 +105,11 @@ static enum xnn_status reshape_lshift_operator(
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;
   switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_lshift_nd_s16:
+      status = xnn_reshape_lshift_nd_s16(
+        opdata->operator_objects[0], opdata->shape1.num_dims, opdata->shape1.dim, opdata->shape2.num_dims,
+        opdata->shape2.dim, threadpool);
+      break;
     case xnn_operator_type_lshift_nd_s32:
       status = xnn_reshape_lshift_nd_s32(
         opdata->operator_objects[0], opdata->shape1.num_dims, opdata->shape1.dim, opdata->shape2.num_dims,
@@ -147,7 +155,10 @@ static enum xnn_status setup_lshift_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
-    case xnn_operator_type_multiply_nd_s32:
+    case xnn_operator_type_lshift_nd_s16:
+      return xnn_setup_lshift_nd_s16(opdata->operator_objects[0], input1_data, input2_data, output_data);
+      break;
+    case xnn_operator_type_lshift_nd_s32:
       return xnn_setup_lshift_nd_s32(opdata->operator_objects[0], input1_data, input2_data, output_data);
       break;
     default:
@@ -179,6 +190,8 @@ enum xnn_status xnn_define_lshift(
   }
 
   switch (input1_value->datatype) {
+    case xnn_datatype_int16:
+      break;
     case xnn_datatype_int32:
       break;
     default:
@@ -201,6 +214,8 @@ enum xnn_status xnn_define_lshift(
   }
 
   switch (input2_value->datatype) {
+    case xnn_datatype_int16:
+      break;
     case xnn_datatype_int32:
       break;
     default:
@@ -224,6 +239,9 @@ enum xnn_status xnn_define_lshift(
 
   enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
+    case xnn_datatype_int16:
+      compute_type = xnn_compute_type_s16;
+      break;
     case xnn_datatype_int32:
       compute_type = xnn_compute_type_s32;
       break;
