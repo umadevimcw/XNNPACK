@@ -23,6 +23,7 @@
 #include "xnnpack/maxpool.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/prelu.h"
+#include "xnnpack/simd/s16-sse41.h"
 #include "xnnpack/simd/s32-sse41.h"
 #include "xnnpack/unaligned.h"
 #include "xnnpack/vbinary.h"
@@ -11420,6 +11421,111 @@ void xnn_u8_ibilinear_ukernel__sse41_c16(
 
     output = (uint8_t*) ((uintptr_t) output + output_increment);
   } while (--output_pixels != 0);
+}
+
+void xnn_s16_vlshift_ukernel__sse41_u8(
+    size_t batch,
+    const int16_t* input_a,
+    const int16_t* input_b,
+    int16_t* output,
+    const union xnn_s16_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
+  assert(input_b != NULL);
+  assert(input_a != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s16 == 8);
+
+  for (; batch >= xnn_simd_bytes_s16; batch -= xnn_simd_bytes_s16) {
+    xnn_simd_s16_t vin1 = xnn_loadu_s16(input_a);
+    input_a += xnn_simd_size_s16;
+
+    xnn_simd_s16_t vin2 = xnn_loadu_s16(input_b);
+    input_b += xnn_simd_size_s16;
+
+    xnn_simd_s16_t vy = xnn_sllv_s16(vin1, vin2);
+
+    xnn_storeu_s16(output, vy);
+    output += xnn_simd_size_s16;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    xnn_simd_s16_t vin1 = xnn_load_tail_s16(input_a, batch >> XNN_LOG2_SIZEOF_INT16_T);
+
+    xnn_simd_s16_t vin2 = xnn_load_tail_s16(input_b, batch >> XNN_LOG2_SIZEOF_INT16_T);
+
+    xnn_simd_s16_t vy = xnn_sllv_s16(vin1, vin2);
+
+    xnn_store_tail_s16(output, vy, batch >> XNN_LOG2_SIZEOF_INT16_T);
+  }
+}
+
+void xnn_s16_vlshiftc_ukernel__sse41_u8(
+    size_t batch,
+    const int16_t* input1,
+    const int16_t* input2,
+    int16_t* output,
+    const union xnn_s16_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
+  assert(input1 != NULL);
+  assert(input2 != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s16 == 8);
+
+  xnn_simd_s16_t vin2 = xnn_set1_s16(*input2);
+
+  for (; batch >= xnn_simd_bytes_s16; batch -= xnn_simd_bytes_s16) {
+    xnn_simd_s16_t vin1 = xnn_loadu_s16(input1);
+    input1 += xnn_simd_size_s16;
+
+    xnn_simd_s16_t vy = xnn_sllv_s16(vin1, vin2);
+
+    xnn_storeu_s16(output, vy);
+    output += xnn_simd_size_s16;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    xnn_simd_s16_t vin1 = (xnn_load_tail_s16(input1, batch >> XNN_LOG2_SIZEOF_INT16_T));
+
+    xnn_simd_s16_t vy = xnn_sllv_s16(vin1, vin2);
+
+    xnn_store_tail_s16(output, vy, batch >> XNN_LOG2_SIZEOF_INT16_T);
+  }
+}
+
+void xnn_s16_vrlshiftc_ukernel__sse41_u8(
+    size_t batch,
+    const int16_t* input1,
+    const int16_t* input2,
+    int16_t* output,
+    const union xnn_s16_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
+  assert(input1 != NULL);
+  assert(input2 != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s16 == 8);
+
+  xnn_simd_s16_t vin2 = xnn_set1_s16(*input2);
+
+  for (; batch >= xnn_simd_bytes_s16; batch -= xnn_simd_bytes_s16) {
+    xnn_simd_s16_t vin1 = xnn_loadu_s16(input1);
+    input1 += xnn_simd_size_s16;
+
+    xnn_simd_s16_t vy = xnn_sllv_s16(vin2, vin1);
+
+    xnn_storeu_s16(output, vy);
+    output += xnn_simd_size_s16;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    xnn_simd_s16_t vin1 = (xnn_load_tail_s16(input1, batch >> XNN_LOG2_SIZEOF_INT16_T));
+
+    xnn_simd_s16_t vy = xnn_sllv_s16(vin2, vin1);
+
+    xnn_store_tail_s16(output, vy, batch >> XNN_LOG2_SIZEOF_INT16_T);
+  }
 }
 
 void xnn_s32_vlshift_ukernel__sse41_u8(

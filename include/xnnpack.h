@@ -2333,6 +2333,23 @@ enum xnn_status xnn_run_add_nd_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_lshift_nd_s16(
+  uint32_t flags,
+  xnn_operator_t* lshift_op_out);
+
+enum xnn_status xnn_reshape_lshift_nd_s16(
+  xnn_operator_t lshift_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_lshift_nd_s16(
+  xnn_operator_t lshift_op,
+  const int16_t* input1,
+  const int16_t* input2,
+  int16_t* output);
 
 enum xnn_status xnn_create_lshift_nd_s32(
   uint32_t flags,

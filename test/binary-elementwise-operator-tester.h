@@ -181,6 +181,15 @@ class BinaryElementwiseOperatorTester {
     }
   }
 
+  int16_t Compute(int16_t a, int16_t b) const{
+    switch (operation_type()) {
+      case OperationType::LShift:
+        return (b > 15 || b < 0)? 0 : (a << b);
+      default:
+        return INT16_MAX;
+    }
+  }
+
   int32_t Compute(int32_t a, int32_t b) const{
     switch (operation_type()) {
       case OperationType::Add:
@@ -214,6 +223,8 @@ class BinaryElementwiseOperatorTester {
 
   void TestF32() const;
 
+  void TestS16() const;
+  
   void TestS32() const;
 
   void TestRunF32() const;

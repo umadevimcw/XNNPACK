@@ -281,6 +281,7 @@ struct xnn_operator {
     union xnn_qs8_lrelu_params qs8_lrelu;
     union xnn_qu8_lrelu_params qu8_lrelu;
     union xnn_s8_minmax_params s8_minmax;
+    union xnn_s16_default_params s16_default;
     union xnn_s32_default_params s32_default;
     union xnn_u8_minmax_params u8_minmax;
   } params;
