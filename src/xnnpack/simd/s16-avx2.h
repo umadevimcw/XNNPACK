@@ -47,23 +47,9 @@ static XNN_INLINE xnn_simd_s16_t xnn_clz_s16(xnn_simd_s16_t a) {
   xnn_simd_s16_t shift_low = _mm256_srli_epi32(low_a, 23);
   xnn_simd_s16_t shift_high = _mm256_srli_epi32(high_a, 23);
 
-
-  xnn_simd_s16_t exponent =  _mm256_set_epi16(_mm256_extract_epi16(shift_high,14),
-                      _mm256_extract_epi16(shift_high, 12),
-                      _mm256_extract_epi16(shift_high, 10),
-                      _mm256_extract_epi16(shift_high, 8),
-                      _mm256_extract_epi16(shift_high, 6),
-                      _mm256_extract_epi16(shift_high, 4),
-                      _mm256_extract_epi16(shift_high, 2),
-                      _mm256_extract_epi16(shift_high, 0),
-                      _mm256_extract_epi16(shift_low, 14),
-                      _mm256_extract_epi16(shift_low, 12),
-                      _mm256_extract_epi16(shift_low, 10),
-                      _mm256_extract_epi16(shift_low, 8),
-                      _mm256_extract_epi16(shift_low, 6),
-                      _mm256_extract_epi16(shift_low, 4),
-                      _mm256_extract_epi16(shift_low, 2),
-                      _mm256_extract_epi16(shift_low, 0));
+  xnn_simd_s16_t exponent_combined = _mm256_packs_epi32(shift_low, shift_high);
+  xnn_simd_s16_t exponent =
+      _mm256_permute4x64_epi64(exponent_combined, _MM_SHUFFLE(3, 1, 2, 0));
 
   exponent = _mm256_and_si256(exponent, _mm256_set1_epi16(0xFF));
 

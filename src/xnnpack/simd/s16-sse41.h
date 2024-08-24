@@ -39,14 +39,11 @@ static XNN_INLINE xnn_simd_s16_t xnn_clz_s16(xnn_simd_s16_t a) {
   xnn_simd_s16_t low_a = _mm_castps_si128(low);
   xnn_simd_s16_t high_a = _mm_castps_si128(high);
   //
-  xnn_simd_s16_t shift_low = _mm_srli_epi32(low_a, 23);    //& 0xFF;
-  xnn_simd_s16_t shift_high = _mm_srli_epi32(high_a, 23);  //& 0xFF;
-                                                           //
-  xnn_simd_s16_t exponent = _mm_set_epi16(
-      (_mm_extract_epi16(shift_high, 6)), (_mm_extract_epi16(shift_high, 4)),
-      (_mm_extract_epi16(shift_high, 2)), (_mm_extract_epi16(shift_high, 0)),
-      (_mm_extract_epi16(shift_low, 6)), (_mm_extract_epi16(shift_low, 4)),
-      (_mm_extract_epi16(shift_low, 2)), (_mm_extract_epi16(shift_low, 0)));
+  xnn_simd_s16_t shift_low = _mm_srli_epi32(low_a, 23);
+  xnn_simd_s16_t shift_high = _mm_srli_epi32(high_a, 23);
+
+  xnn_simd_s16_t exponent = _mm_packs_epi32(shift_low, shift_high);
+
   exponent = _mm_and_si128(exponent, _mm_set1_epi16(0xFF));
   xnn_simd_s16_t result = _mm_sub_epi16(
       _mm_set1_epi16(15), _mm_sub_epi16(exponent, _mm_set1_epi16(127)));
