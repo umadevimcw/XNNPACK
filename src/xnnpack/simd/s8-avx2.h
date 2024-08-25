@@ -56,6 +56,19 @@ static XNN_INLINE __m256i xnn_high_cvt_s8_s16(xnn_simd_s8_t a) {
   return _mm256_cvtepi8_epi16(_mm256_extracti128_si256(a, 1));
 }
 
+// Bitwise operations
+static XNN_INLINE xnn_simd_s8_t xnn_and_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return _mm256_and_si256(a, b);
+}
+
+static XNN_INLINE xnn_simd_s8_t xnn_or_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return _mm256_or_si256(a, b);
+}
+
+static XNN_INLINE xnn_simd_s8_t xnn_xor_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return _mm256_xor_si256(a, b);
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s8_t xnn_loadu_s8(const int8_t* ptr) {

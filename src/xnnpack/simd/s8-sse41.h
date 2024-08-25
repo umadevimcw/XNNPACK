@@ -41,6 +41,19 @@ static XNN_INLINE xnn_simd_s8_t xnn_min_s8(xnn_simd_s8_t a,
   return _mm_min_epi8(a, b);
 }
 
+// Bitwise operations
+static XNN_INLINE xnn_simd_s8_t xnn_and_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return _mm_and_si128(a, b);
+}
+
+static XNN_INLINE xnn_simd_s8_t xnn_or_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return _mm_or_si128(a, b);
+}
+
+static XNN_INLINE xnn_simd_s8_t xnn_xor_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return _mm_xor_si128(a, b);
+}
+
 static XNN_INLINE __m128i xnn_low_cvt_s8_s16(xnn_simd_s8_t a) {
   return _mm_cvtepi8_epi16(a);
 }

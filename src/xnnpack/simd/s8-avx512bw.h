@@ -50,6 +50,19 @@ static XNN_INLINE __m512i xnn_high_cvt_s8_s32(xnn_simd_s8_t a) {
   return _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(a, 1));
 }
 
+// Bitwise operations
+static XNN_INLINE xnn_simd_s8_t xnn_and_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return _mm512_and_si512(a, b);
+}
+
+static XNN_INLINE xnn_simd_s8_t xnn_or_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return _mm512_or_si512(a, b);
+}
+
+static XNN_INLINE xnn_simd_s8_t xnn_xor_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return _mm512_xor_si512(a, b);
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s8_t xnn_loadu_s8(const int8_t* ptr) {

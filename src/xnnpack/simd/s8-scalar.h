@@ -26,6 +26,19 @@ static XNN_INLINE xnn_simd_s8_t xnn_add_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
   return a + b;
 }
 
+// Bitwise operations
+static XNN_INLINE xnn_simd_s8_t xnn_and_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return a & b;
+}
+
+static XNN_INLINE xnn_simd_s8_t xnn_or_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return a | b;
+}
+
+static XNN_INLINE xnn_simd_s8_t xnn_xor_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return a ^ b;
+}
+
 static XNN_INLINE xnn_simd_s8_t xnn_loadu_s8(const int8_t *ptr) { return *ptr; }
 
 static XNN_INLINE xnn_simd_s8_t xnn_load_s8(const int8_t *ptr) { return *ptr; }

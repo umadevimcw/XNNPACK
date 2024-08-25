@@ -48,6 +48,19 @@ static XNN_INLINE int16x8_t xnn_high_cvt_s8_s16(xnn_simd_s8_t a) {
   return vmovl_s8(vget_high_s8(a));
 }
 
+// Bitwise operations
+static XNN_INLINE xnn_simd_s8_t xnn_and_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return vandq_s8(a, b);
+}
+
+static XNN_INLINE xnn_simd_s8_t xnn_or_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return vorrq_s8(a, b);
+}
+
+static XNN_INLINE xnn_simd_s8_t xnn_xor_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return veorq_s8(a, b);
+}
+
 // Load/store operations.
 static XNN_INLINE xnn_simd_s8_t xnn_loadu_s8(const int8_t* ptr) {
   return vld1q_s8(ptr);
