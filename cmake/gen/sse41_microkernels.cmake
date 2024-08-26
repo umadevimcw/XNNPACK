@@ -371,6 +371,12 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/s8-ibilinear/gen/s8-ibilinear-sse41-c8.c
   src/s8-ibilinear/gen/s8-ibilinear-sse41-c16.c
   src/s8-maxpool/s8-maxpool-9p8x-minmax-sse41-c16.c
+  src/s8-vbitwise/gen/s8-vand-sse41.c
+  src/s8-vbitwise/gen/s8-vandc-sse41.c
+  src/s8-vbitwise/gen/s8-vor-sse41.c
+  src/s8-vbitwise/gen/s8-vorc-sse41.c
+  src/s8-vbitwise/gen/s8-vxor-sse41.c
+  src/s8-vbitwise/gen/s8-vxorc-sse41.c
   src/s8-vclamp/s8-vclamp-sse41-u64.c
   src/s32-vmul/gen/s32-vmul-sse41.c
   src/s32-vmul/gen/s32-vmulc-sse41.c

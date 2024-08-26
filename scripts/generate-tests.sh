@@ -185,6 +185,13 @@ tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qs
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qu8-vmulc-minmax-fp32.yaml --output test/qu8-vmulc-minmax-fp32.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qu8-vmulc-minmax-rndnu.yaml --output test/qu8-vmulc-minmax-rndnu.cc &
 
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/s8-vand.yaml   --output test/s8-vand.cc &
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/s8-vandc.yaml    --output test/s8-vandc.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/s8-vor.yaml   --output test/s8-vor.cc &
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/s8-vorc.yaml    --output test/s8-vorc.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/s8-vxor.yaml   --output test/s8-vxor.cc &
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/s8-vxorc.yaml    --output test/s8-vxorc.cc &
+
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/s32-vmul.yaml   --output test/s32-vmul.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/s32-vmulc.yaml    --output test/s32-vmulc.cc &
 

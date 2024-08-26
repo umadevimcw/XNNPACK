@@ -280,6 +280,88 @@ void VBinaryMicrokernelTester::Test(
 }
 
 void VBinaryMicrokernelTester::Test(
+    xnn_s8_vbinary_ukernel_fn vbinary, OpType op_type,
+    xnn_init_s8_default_params_fn init_params) const {
+  xnnpack::ReplicableRandomDevice rng;
+  std::uniform_int_distribution<int8_t> s8dist(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+
+  std::vector<int8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+  std::vector<int8_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+  std::vector<int8_t> y(batch_size() + (inplace_a() || inplace_b()
+                                            ? XNN_EXTRA_BYTES / sizeof(int8_t)
+                                            : 0));
+  std::vector<int8_t> y_ref(batch_size());
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(a.begin(), a.end(), [&]() { return s8dist(rng); });
+    std::generate(b.begin(), b.end(), [&]() { return s8dist(rng); });
+    if (inplace_a() || inplace_b()) {
+      std::generate(y.begin(), y.end(), [&]() { return s8dist(rng); });
+    } else {
+      std::fill(y.begin(), y.end(), INT8_MAX);
+    }
+    const int8_t* a_data = inplace_a() ? y.data() : a.data();
+    const int8_t* b_data = inplace_b() ? y.data() : b.data();
+
+    // Compute reference results.
+    for (size_t i = 0; i < batch_size(); i++) {
+      switch (op_type) {
+        case OpType::Add:
+          y_ref[i] = a_data[i] + b_data[i];
+          break;
+        case OpType::AND:
+          y_ref[i] = a_data[i] & b_data[i];
+          break;
+        case OpType::CopySign:
+          y_ref[i] = std::copysign(a_data[i], b_data[i]);
+          break;
+        case OpType::Div:
+          y_ref[i] = a_data[i] / b_data[i];
+          break;
+        case OpType::Max:
+          y_ref[i] = std::max<int8_t>(a_data[i], b_data[i]);
+          break;
+        case OpType::Min:
+          y_ref[i] = std::min<int8_t>(a_data[i], b_data[i]);
+          break;
+        case OpType::Mul:
+          // Overflow is the expected behaviour
+          y_ref[i] = ((((int64_t)a_data[i] * (int64_t)b_data[i]) << 32) >> 32);
+          break;
+        case OpType::OR:
+          y_ref[i] = a_data[i] | b_data[i];
+          break;
+        case OpType::SqrDiff: {
+          const int32_t diff = a_data[i] - b_data[i];
+          y_ref[i] = diff * diff;
+          break;
+        }
+        case OpType::Sub:
+          y_ref[i] = a_data[i] - b_data[i];
+          break;
+        case OpType::XOR:
+          y_ref[i] = a_data[i] ^ b_data[i];
+          break;
+      }
+    }
+
+    // Prepare parameters.
+    xnn_s8_default_params params;
+    if (init_params != nullptr) {
+      init_params(&params);
+    }
+
+    // Call optimized micro-kernel.
+    vbinary(batch_size() * sizeof(int8_t), a_data, b_data, y.data(), &params);
+
+    // Verify results.
+    for (size_t i = 0; i < batch_size(); i++) {
+      EXPECT_EQ(y[i], y_ref[i]) << "at " << i << " / " << batch_size();
+    }
+  }
+}
+
+void VBinaryMicrokernelTester::Test(
     xnn_s32_vbinary_ukernel_fn vbinary, OpType op_type,
     xnn_init_s32_default_params_fn init_params) const {
   xnnpack::ReplicableRandomDevice rng;

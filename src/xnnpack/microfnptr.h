@@ -2101,6 +2101,13 @@ typedef void (*xnn_f32_vbinary_ukernel_fn)(
     float* output,
     const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_s8_vbinary_ukernel_fn)(
+    size_t batch,
+    const int8_t* input_x,
+    const int8_t* input_y,
+    int8_t* output,
+    const union xnn_s8_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_s32_vbinary_ukernel_fn)(
     size_t batch,
     const int32_t* input_x,
@@ -2641,6 +2648,9 @@ typedef size_t (*xnn_init_f16_expminus_params_fn)(
 
 typedef size_t (*xnn_init_f32_expminus_params_fn)(
   union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef size_t (*xnn_init_s8_default_params_fn)(
+  union xnn_s8_default_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_s32_default_params_fn)(
   union xnn_s32_default_params params[XNN_MIN_ELEMENTS(1)]);

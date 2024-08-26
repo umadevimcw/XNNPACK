@@ -25,6 +25,10 @@ union xnn_f32_default_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
+union xnn_s8_default_params {
+  char _;  // Dummy member variable to comply with the C standard
+};
+
 union xnn_s32_default_params {
   char _;  // Dummy member variable to comply with the C standard
 };

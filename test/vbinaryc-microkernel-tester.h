@@ -20,6 +20,7 @@ class VBinaryCMicrokernelTester {
  public:
   enum class OpType {
     AddC,
+    ANDC,
     CopySignC,
     RCopySignC,
     DivC,
@@ -27,9 +28,11 @@ class VBinaryCMicrokernelTester {
     MaxC,
     MinC,
     MulC,
+    ORC,
     SqrDiffC,
     SubC,
     RSubC,
+    XORC,
   };
 
   VBinaryCMicrokernelTester& batch_size(size_t batch_size) {
@@ -143,6 +146,9 @@ class VBinaryCMicrokernelTester {
   void Test(xnn_qs8_vmul_minmax_ukernel_fn vmul_minmax,
             xnn_init_qs8_mul_minmax_params_fn init_params,
             xnn_qs8_requantize_fn requantize) const;
+
+  void Test(xnn_s8_vbinary_ukernel_fn vbinaryc, OpType op_type,
+            xnn_init_s8_default_params_fn init_params = nullptr) const;
 
   void Test(xnn_s32_vbinary_ukernel_fn vbinaryc, OpType op_type,
             xnn_init_s32_default_params_fn init_params = nullptr) const;

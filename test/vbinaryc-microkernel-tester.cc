@@ -301,6 +301,94 @@ void VBinaryCMicrokernelTester::Test(
   }
 }
 
+void VBinaryCMicrokernelTester::Test(
+    xnn_s8_vbinary_ukernel_fn vbinaryc, OpType op_type,
+    xnn_init_s8_default_params_fn init_params) const {
+  xnnpack::ReplicableRandomDevice rng;
+  std::uniform_int_distribution<int8_t> s8dist(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+
+  std::vector<int8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+  const int8_t b = s8dist(rng);
+  std::vector<int8_t> y(batch_size() +
+                        (inplace() ? XNN_EXTRA_BYTES / sizeof(int8_t) : 0));
+  std::vector<int8_t> y_ref(batch_size());
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(a.begin(), a.end(), [&]() { return s8dist(rng); });
+    if (inplace()) {
+      std::generate(y.begin(), y.end(), [&]() { return s8dist(rng); });
+    } else {
+      std::fill(y.begin(), y.end(), INT8_MAX);
+    }
+    const int8_t* a_data = inplace() ? y.data() : a.data();
+
+    // Compute reference results.
+    for (size_t i = 0; i < batch_size(); i++) {
+      switch (op_type) {
+        case OpType::AddC:
+          y_ref[i] = a_data[i] + b;
+          break;
+        case OpType::ANDC:
+          y_ref[i] = a_data[i] & b;
+          break;
+        case OpType::CopySignC:
+          y_ref[i] = std::copysign(a_data[i], b);
+          break;
+        case OpType::RCopySignC:
+          y_ref[i] = std::copysign(b, a_data[i]);
+          break;
+        case OpType::DivC:
+          y_ref[i] = a_data[i] / b;
+          break;
+        case OpType::RDivC:
+          y_ref[i] = b / a_data[i];
+          break;
+        case OpType::MaxC:
+          y_ref[i] = std::max<int8_t>(a_data[i], b);
+          break;
+        case OpType::MinC:
+          y_ref[i] = std::min<int8_t>(a_data[i], b);
+          break;
+        case OpType::MulC:
+          // Overflow is the expected behaviour
+          y_ref[i] = ((((int64_t)a_data[i] * (int64_t)b) << 32) >> 32);
+          break;
+        case OpType::ORC:
+          y_ref[i] = a_data[i] | b;
+          break;
+        case OpType::SqrDiffC: {
+          const int32_t diff = a_data[i] - b;
+          y_ref[i] = diff * diff;
+          break;
+        }
+        case OpType::SubC:
+          y_ref[i] = a_data[i] - b;
+          break;
+        case OpType::RSubC:
+          y_ref[i] = b - a_data[i];
+          break;
+        case OpType::XORC:
+          y_ref[i] = a_data[i] ^ b;
+          break;
+      }
+    }
+
+    // Prepare parameters.
+    xnn_s8_default_params params;
+    if (init_params != nullptr) {
+      init_params(&params);
+    }
+
+    // Call optimized micro-kernel.
+    vbinaryc(batch_size() * sizeof(int8_t), a_data, &b, y.data(),
+             init_params != nullptr ? &params : nullptr);
+
+    // Verify results.
+    for (size_t i = 0; i < batch_size(); i++) {
+      EXPECT_EQ(y[i], y_ref[i]) << "at " << i << " / " << batch_size();
+    }
+  }
+}
 
 void VBinaryCMicrokernelTester::Test(
     xnn_s32_vbinary_ukernel_fn vbinaryc, OpType op_type,
