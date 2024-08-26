@@ -961,6 +961,9 @@ void VBinaryCMicrokernelTester::Test(
         break;
       }
       case OpType::RRemC: {
+        init_params(&params, b_zero_point_s16(), a_zero_point_s16(), b_scale(),
+                  a_scale(), 1 / y_scale(), y_zero_point_s16(), qmin_s16(),
+                  qmax_s16());
         for (size_t i = 0; i < batch_size(); i++) {
           const float a_f =
               static_cast<float>(static_cast<int32_t>(a_data[i]) -
@@ -982,6 +985,9 @@ void VBinaryCMicrokernelTester::Test(
           y_ref[i] = xnn_qs16_requantize_rem_fp32(b, a_data[i], params,
                                                   qmin_s16(), qmax_s16());
         }
+        init_params(&params, a_zero_point_s16(), b_zero_point_s16(), a_scale(),
+                  b_scale(), 1 / y_scale(), y_zero_point_s16(), qmin_s16(),
+                  qmax_s16());
         break;
       }
       default:
