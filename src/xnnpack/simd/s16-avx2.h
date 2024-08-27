@@ -29,6 +29,23 @@ static const int32_t mask_table_avx_s32[14] = {-1, -1, -1, -1, -1, -1, -1,
                                                0,  0,  0,  0,  0,  0,  0};
 // Arithmetic operations.
 
+// Bitwise operations.
+static XNN_INLINE xnn_simd_s16_t xnn_popcnt_s16(xnn_simd_s16_t a) {
+  xnn_simd_s16_t lookup_table = _mm256_setr_epi8(
+    (char)0, (char)1, (char)1, (char)2,(char)1, (char)2, (char)2, (char)3,
+    (char)1, (char)2, (char)2, (char)3,(char)2, (char)3, (char)3, (char)4,
+    (char)0, (char)1, (char)1, (char)2,(char)1, (char)2, (char)2, (char)3,
+    (char)1, (char)2, (char)2, (char)3,(char)2, (char)3, (char)3, (char)4
+  );
+  const xnn_simd_s16_t mask =  _mm256_set1_epi16(0x000F);
+  xnn_simd_s16_t result = _mm256_setzero_si256();
+  for (int i = 0; i < 4; ++i) {
+    xnn_simd_s16_t nibble = _mm256_and_si256(_mm256_srli_epi16(a, i*4), mask);
+    result = _mm256_add_epi16(result, _mm256_shuffle_epi8(lookup_table, nibble));
+  }
+  return result;
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t* ptr) {

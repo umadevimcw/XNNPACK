@@ -59,6 +59,23 @@ TEST_F(S16SimdNEONTest, StoreTail) {
     }
   }
 }
+
+TEST_F(S16SimdNEONTest, PopCount) {
+  const xnn_simd_s16_t a = xnn_loadu_s16(inputs_.data());
+  const xnn_simd_s16_t res = xnn_popcnt_s16(a);
+  xnn_storeu_s16(output_.data(), res);
+  const static auto popcount_fn = [](uint16_t a) -> int16_t {
+    int16_t count = 0;
+    while (a) {
+        count += a & 1;
+        a >>= 1;
+    }
+    return count;
+  };
+  for (size_t k = 0; k < xnn_simd_size_s16; k++) {
+    ASSERT_EQ(output_[k], popcount_fn(inputs_[k]) );
+  }
+}
 }  // namespace xnnpack
 
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64

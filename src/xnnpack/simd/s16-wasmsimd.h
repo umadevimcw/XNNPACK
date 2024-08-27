@@ -26,6 +26,22 @@ typedef v128_t xnn_simd_s16_t;
 
 // Arithmetic operations.
 
+// Bitwise operations.
+static XNN_INLINE xnn_simd_s16_t xnn_popcnt_s16(xnn_simd_s16_t a) {
+  const xnn_simd_s8_t bytes_low = wasm_i8x16_extract_lane(a, 0);
+  const xnn_simd_s8_t bytes_high = wasm_i8x16_extract_lane(a, 1);
+
+  const xnn_simd_s8_t popcnt_low = wasm_i8x16_popcnt(bytes_low);
+  const xnn_simd_s8_t popcnt_high = wasm_i8x16_popcnt(bytes_high);
+
+  const xnn_simd_s16_t half_sum = wasm_i16x8_add(
+    wasm_i16x8_extend_low_i8x16(popcnt_low),
+    wasm_i16x8_extend_high_i8x16(popcnt_high)
+  );
+
+  return half_sum;
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t* ptr) {

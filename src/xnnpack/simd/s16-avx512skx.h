@@ -27,6 +27,41 @@ typedef __m512i xnn_simd_s16_t;
 
 // Arithmetic operations.
 
+// Bitwise operations.
+static XNN_INLINE xnn_simd_s16_t xnn_popcnt_s16(xnn_simd_s16_t a) {
+  __m256i lookup_table =_mm256_setr_epi8(
+    (char)0, (char)1, (char)1, (char)2,(char)1, (char)2, (char)2, (char)3,
+    (char)1, (char)2, (char)2, (char)3,(char)2, (char)3, (char)3, (char)4,
+    (char)0, (char)1, (char)1, (char)2,(char)1, (char)2, (char)2, (char)3,
+    (char)1, (char)2, (char)2, (char)3,(char)2, (char)3, (char)3, (char)4
+  );
+  const __m256i mask = _mm256_set1_epi16(0x000F);
+  const __m256i lower = _mm512_extracti64x4_epi64(a, 0);
+  const __m256i upper = _mm512_extracti64x4_epi64(a, 1);
+  __m256i result_upper = _mm256_setzero_si256();
+  __m256i result_lower = _mm256_setzero_si256();
+
+  for (int i = 0; i < 4; ++i) {
+    const __m256i nibble_l = _mm256_and_si256(_mm256_srli_epi16(lower, i * 4), mask);
+    result_lower = _mm256_add_epi16(result_lower, _mm256_shuffle_epi8(lookup_table, nibble_l));
+
+    const __m256i nibble_u = _mm256_and_si256(_mm256_srli_epi16(upper, i * 4), mask);
+    result_upper = _mm256_add_epi16(result_upper, _mm256_shuffle_epi8(lookup_table, nibble_u));
+  }
+
+  xnn_simd_s16_t result = _mm512_set_epi64(
+    _mm256_extract_epi64(result_upper, 3),
+    _mm256_extract_epi64(result_upper, 2),
+    _mm256_extract_epi64(result_upper, 1),
+    _mm256_extract_epi64(result_upper, 0),
+    _mm256_extract_epi64(result_lower, 3),
+    _mm256_extract_epi64(result_lower, 2),
+    _mm256_extract_epi64(result_lower, 1),
+    _mm256_extract_epi64(result_lower, 0)
+  );
+  return result;
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t* ptr) {
@@ -56,7 +91,7 @@ static XNN_INLINE xnn_simd_s16_t xnn_set1_or_load_s16_t(const int16_t* v) {
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_s16_t
-xnn_load_tail_s16_t(const int16_t* input, size_t num_elements) XNN_OOB_READS {
+xnn_load_tail_s16(const int16_t* input, size_t num_elements) XNN_OOB_READS {
   assert(num_elements > 0);
   assert(num_elements <= xnn_simd_size_s16);
   return _mm512_loadu_epi16(input);

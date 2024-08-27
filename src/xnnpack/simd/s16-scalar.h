@@ -25,6 +25,17 @@ typedef int16_t xnn_simd_s16_t;
 
 // Arithmetic operations.
 
+// Bitwise operations.
+static XNN_INLINE xnn_simd_s16_t xnn_popcnt_s16(xnn_simd_s16_t a) {
+  int count = 0;
+  while (a) {
+    a &= (a - 1);
+    count++;
+  }
+  return count;
+}
+
+// Load/store operations.
 static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t *ptr) { return *ptr; }
 
 static XNN_INLINE xnn_simd_s16_t xnn_load_s16(const int16_t *ptr) { return *ptr; }

@@ -25,6 +25,20 @@ typedef int16x8_t xnn_simd_s16_t;
 
 // Arithmetic operations.
 
+// Bitwise operations.
+static XNN_INLINE xnn_simd_s16_t xnn_popcnt_s16(xnn_simd_s16_t a) {
+  uint8x16_t bytes_low = vreinterpretq_u8_s16(vget_low_s16(a));
+  uint8x16_t bytes_high = vreinterpretq_u8_s16(vget_high_s16(a));
+
+  uint8x16_t byte_popcnt_low = vcntq_u8(bytes_low);
+  uint8x16_t byte_popcnt_high = vcntq_u8(bytes_high);
+
+  uint16x8_t half_sum_low = vpaddlq_u8(byte_popcnt_low);
+  uint16x8_t half_sum_high = vpaddlq_u8(byte_popcnt_high);
+
+  return vcombine_s16(vreinterpret_s16_u16(vget_low_u16(half_sum_low)), vreinterpret_s16_u16(vget_high_u16(half_sum_high)));
+}
+
 // Load/store operations.
 static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t* ptr) {
   return vld1q_s16(ptr);

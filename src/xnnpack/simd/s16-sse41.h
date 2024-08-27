@@ -26,6 +26,21 @@ typedef __m128i xnn_simd_s16_t;
 
 // Arithmetic operations.
 
+// Bitwise operations.
+static XNN_INLINE xnn_simd_s16_t xnn_popcnt_s16(xnn_simd_s16_t a) {
+  xnn_simd_s16_t lookup_table = _mm_setr_epi8(
+    (char)0, (char)1, (char)1, (char)2,(char)1, (char)2, (char)2, (char)3,
+    (char)1, (char)2, (char)2, (char)3,(char)2, (char)3, (char)3, (char)4
+  );
+  const xnn_simd_s16_t mask = _mm_set1_epi16(0x0F);
+  xnn_simd_s16_t result = _mm_setzero_si128();
+  for (int i = 0; i < 8; ++i) {
+    const xnn_simd_s16_t nibble = _mm_and_si128(_mm_srli_epi16(a, i * 4), mask);
+    result = _mm_add_epi8(result, _mm_shuffle_epi8(lookup_table, nibble));
+  }
+  return result;
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t* ptr) {
