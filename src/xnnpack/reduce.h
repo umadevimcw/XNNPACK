@@ -297,6 +297,17 @@ DECLARE_U8_REDUCE_UKERNEL_FUNCTION(xnn_u8_rmax_ukernel__neon_u16)
 DECLARE_U8_REDUCE_UKERNEL_FUNCTION(xnn_u8_rmax_ukernel__scalar_u2)
 DECLARE_U8_REDUCE_UKERNEL_FUNCTION(xnn_u8_rmax_ukernel__sse2_u16)
 
+#define DECLARE_F32_REDUCEWINDOW_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                         \
+      size_t rows,                                   \
+      size_t cols,                                   \
+      const float* input,                            \
+      const float init_value,                        \
+      float* output,                                 \
+      const union xnn_f32_reducewindow_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_F32_REDUCEWINDOW_UKERNEL_FUNCTION(xnn_f32_rwsum_ukernel__scalar_u1)
+
 #define DECLARE_F32_RSUM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                       \
       size_t batch,                                \

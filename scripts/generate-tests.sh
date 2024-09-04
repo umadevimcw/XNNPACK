@@ -241,6 +241,8 @@ tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/f32-rsu
 
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/u8-rmax.yaml --output test/u8-rmax.cc &
 
+tools/generate-reducewindow-test.py --tester ReduceWindowMicrokernelTester --spec test/f32-rwsum.yaml --output test/f32-rwsum.cc &
+
 tools/generate-rdsum-test.py --spec test/f16-f32acc-rdsum.yaml --output test/f16-f32acc-rdsum.cc &
 tools/generate-rdsum-test.py --spec test/f32-rdsum.yaml --output test/f32-rdsum.cc &
 tools/generate-rdsum-test.py --spec test/qs8-rdsum-minmax-fp32.yaml --output test/qs8-rdsum-minmax-fp32.cc &

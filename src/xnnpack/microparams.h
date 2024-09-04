@@ -29,6 +29,17 @@ union xnn_s32_default_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
+// ReduceWindow: 
+union xnn_f32_reducewindow_params {
+  struct {
+    uint32_t window_dimensions[2];
+    uint32_t window_strides[2];
+    uint32_t base_dilations[2];
+    uint32_t window_dilations[2];
+    int32_t padding[4];      // top,bottom,left,right
+  };
+};
+
 
 // ReLU: serves to differentiate pointer types for micro-kernels with fused ReLU activation.
 

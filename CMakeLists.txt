@@ -1490,6 +1490,7 @@ IF(XNNPACK_BUILD_TESTS)
       f32-rmin
       f32-rminmax
       f32-rsum
+      f32-rwsum
       f32-spmm-minmax
       f32-vcmul
       f32-vmulcaddc-minmax

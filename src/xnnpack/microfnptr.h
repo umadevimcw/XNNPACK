@@ -1593,6 +1593,14 @@ typedef void (*xnn_f32_reduce_ukernel_fn)(
     float* output,
     const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_f32_reducewindow_ukernel_fn)(
+    size_t rows,
+    size_t cols,
+    const float* input,
+    const float init_value,
+    float* output,
+    const union xnn_f32_reducewindow_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_u8_reduce_ukernel_fn)(
     size_t batch,
     const uint8_t* input,
@@ -2690,6 +2698,14 @@ typedef size_t (*xnn_init_f32_lrelu_params_fn)(
 
 typedef size_t (*xnn_init_f32_log_params_fn)(
   union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef size_t (*xnn_init_f32_reducewindow_params_fn)(
+  union xnn_f32_reducewindow_params params[XNN_MIN_ELEMENTS(1)],
+  uint32_t *window_dimensions,
+  uint32_t *window_strides,
+  uint32_t *base_dilations, 
+  uint32_t *window_dilations,
+  int32_t *padding);
 
 typedef size_t (*xnn_init_f32_relu_params_fn)(
   union xnn_f32_relu_params params[XNN_MIN_ELEMENTS(1)]);
