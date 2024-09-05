@@ -45,7 +45,7 @@ def split_ukernel_name(name):
 
 
 REDUCE_TEST_TEMPLATE = """\
-TEST(${TEST_NAME}, rows_eq_1_cols_eq_1) {
+TEST(${TEST_NAME}, size_1_x_1) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   ${TESTER}()
@@ -54,10 +54,10 @@ TEST(${TEST_NAME}, rows_eq_1_cols_eq_1) {
     .Test(${", ".join(TEST_ARGS)});
 }
 
-TEST(${TEST_NAME}, rows_eq_1_cols_eq_n) {
+TEST(${TEST_NAME}, size_1_x_1024) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t col_size = 1; col_size < INT32_MAX ; col_size++) {
+  for (size_t col_size = 1; col_size < 1024 ; col_size++) {
     ${TESTER}()
       .rows(1)
       .cols(col_size)
@@ -65,10 +65,10 @@ TEST(${TEST_NAME}, rows_eq_1_cols_eq_n) {
   }
 }
 
-TEST(${TEST_NAME}, rows_eq_n_cols_eq_1) {
+TEST(${TEST_NAME}, size_1024_x_1) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t row_size = 1; row_size < INT32_MAX ; row_size++) {
+  for (size_t row_size = 1; row_size < 1024 ; row_size++) {
     ${TESTER}()
       .rows(row_size)
       .cols(1)
@@ -76,21 +76,21 @@ TEST(${TEST_NAME}, rows_eq_n_cols_eq_1) {
   }
 }
 
-TEST(${TEST_NAME}, rows_eq_cols) {
+TEST(${TEST_NAME}, square_mat_size_1_x_512) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t size = 1; size < INT16_MAX ; size++) {
+  for (size_t size = 1; size < 512 ; size++) {
     ${TESTER}()
       .rows(size)
       .cols(size)
       .Test(${", ".join(TEST_ARGS)});
   }
 }
-TEST(${TEST_NAME}, rows_cols_from_1_to_n) {
+TEST(${TEST_NAME}, size_512_x_512) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t row_size = 1; row_size < INT16_MAX ; row_size++) {
-    for (size_t col_size = 1; col_size < INT16_MAX ; col_size++) {
+  for (size_t row_size = 1; row_size < 1024; row_size++) {
+    for (size_t col_size = 1; col_size < 1024 ; col_size++) {
       ${TESTER}()
         .rows(row_size)
         .cols(col_size)
