@@ -1410,6 +1410,29 @@ size_t xnn_init_f32_scaleminmax_scalar_params(
   return sizeof(params->scalar);
 }
 
+size_t xnn_init_f32_reducewindow_params(
+  union xnn_f32_reducewindow_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t *window_dimensions,
+  int32_t *window_strides,
+  int32_t *base_dilations, 
+  int32_t *window_dilations,
+  int32_t *padding)
+{
+  params->window_dimensions[0] = window_dimensions[0];
+  params->window_dimensions[1] = window_dimensions[1];
+  params->window_strides[0] = window_strides[0];
+  params->window_strides[1] = window_strides[1];
+  params->base_dilations[0] = base_dilations[0];
+  params->base_dilations[1] = base_dilations[1];
+  params->window_dilations[0] = window_dilations[0];
+  params->window_dilations[1] = window_dilations[1];
+  params->padding[0] = padding[0];
+  params->padding[1] = padding[1];
+  params->padding[2] = padding[2];
+  params->padding[3] = padding[3];
+  return sizeof(params);
+}
+
 size_t xnn_init_f32_gavgpool_scalar_params(
   union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
   float multiplier,

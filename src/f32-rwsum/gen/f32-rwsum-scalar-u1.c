@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-rdsum/scalar.c.in
+//   Template: src/f32-rwsum/scalar.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC
@@ -17,7 +17,6 @@
 #define CEILING_NEG(X) (int)(X)
 #define CEILING(X) ( ((X) > 0) ? CEILING_POS(X) : CEILING_NEG(X) )
 
-
 void xnn_f32_rwsum_ukernel__scalar_u1(
     size_t rows,
     size_t cols,
@@ -26,12 +25,20 @@ void xnn_f32_rwsum_ukernel__scalar_u1(
     float* output,
     const union xnn_f32_reducewindow_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(rows != 0);
-  assert(cols != 0);
-  assert(input != NULL);
-  assert(output != NULL);
+    assert(rows != 0);
+    assert(cols != 0);
+    assert(input != NULL);
+    assert(output != NULL);
+    assert(0 < params->window_dimensions[0]);
+    assert(0 < params->window_dimensions[1]);
+    assert(0 < params->window_strides[0]);
+    assert(0 < params->window_strides[1]);
+    assert(0 < params->base_dilations[0]);
+    assert(0 < params->base_dilations[1]);
+    assert(0 < params->window_dilations[0]);
+    assert(0 < params->window_dilations[1]);
 
-  // padding size
+    // padding size
     int pad_row = rows + params->padding[0] + MAX((rows-1), 0) * (params->base_dilations[0] - 1) + params->padding[1];
     int pad_col = cols + params->padding[2] + MAX((cols-1), 0) * (params->base_dilations[1] - 1) + params->padding[3];
 
@@ -48,9 +55,9 @@ void xnn_f32_rwsum_ukernel__scalar_u1(
         for(int out_c = 0; out_c < out_col; out_c++)
         {
             output[out_r * out_col + out_c ] = init_value;  // 0   
-            for(int i =0; i<win_row; i++)
+            for(int i = 0; i < win_row; i++)
             {
-                for(int j=0; j<win_col; j++)
+                for(int j = 0; j < win_col; j++)
                 {
                     int r = out_r * params->window_strides[0] + i * params->window_dilations[0];
                     int c = out_c * params->window_strides[1] + j * params->window_dilations[1];

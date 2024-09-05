@@ -5,4 +5,4 @@
 
 # SCALAR
 - name: xnn_f32_rwsum_ukernel__scalar_u1
-  init: xnn_f32_reducewindow_params
+  init: xnn_init_f32_reducewindow_params

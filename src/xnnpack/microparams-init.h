@@ -294,6 +294,17 @@ DECLARE_INIT_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f32_scaleminmax_scalar_par
 
 DECLARE_UPDATE_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_update_f32_scaleminmax_scalar_params)
 
+#define DECLARE_INIT_F32_REDUCEWINDOW_PARAMS_FUNCTION(fn_name)      \
+  XNN_INTERNAL size_t fn_name(                                      \
+    union xnn_f32_reducewindow_params params[XNN_MIN_ELEMENTS(1)],  \
+    int32_t *window_dimensions,                                    \
+    int32_t *window_strides,                                       \
+    int32_t *base_dilations,                                       \
+    int32_t *window_dilations,                                     \
+    int32_t *padding);
+
+DECLARE_INIT_F32_REDUCEWINDOW_PARAMS_FUNCTION(xnn_init_f32_reducewindow_params)
+
 
 XNN_INTERNAL size_t xnn_init_f16_gavgpool_neonfp16arith_params(
   union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],

@@ -2701,10 +2701,10 @@ typedef size_t (*xnn_init_f32_log_params_fn)(
 
 typedef size_t (*xnn_init_f32_reducewindow_params_fn)(
   union xnn_f32_reducewindow_params params[XNN_MIN_ELEMENTS(1)],
-  uint32_t *window_dimensions,
-  uint32_t *window_strides,
-  uint32_t *base_dilations, 
-  uint32_t *window_dilations,
+  int32_t *window_dimensions,
+  int32_t *window_strides,
+  int32_t *base_dilations, 
+  int32_t *window_dilations,
   int32_t *padding);
 
 typedef size_t (*xnn_init_f32_relu_params_fn)(
