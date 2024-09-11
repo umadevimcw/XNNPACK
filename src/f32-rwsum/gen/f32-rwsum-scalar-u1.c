@@ -75,7 +75,7 @@ void xnn_f32_rwsum_ukernel__scalar_u1(
 
                     else if ( 0 <= ir && ir < rows && 0 <= ic  && ic < cols)
                     {
-                        if ((r - params->padding[0]) % params->base_dilations[0] == 0 &&(c - params->padding[2]) % params->base_dilations[1] == 0 )
+                        if ((r - params->padding[0]) % params->base_dilations[0] == 0 && (c - params->padding[2]) % params->base_dilations[1] == 0 )
                             output[out_r * out_col + out_c ] += input[ ir * cols  + ic];
                         else 
                            output[out_r * out_col + out_c ] += init_value; //0;

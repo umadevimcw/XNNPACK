@@ -2092,6 +2092,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       f32-rmin
       f32-rminmax
       f32-rsum
+      f32-rwsum
       f32-softmax
       f32-spmm
       f32-vabs
