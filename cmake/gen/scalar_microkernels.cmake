@@ -440,6 +440,7 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rminmax-scalar-u2-acc2.c
   src/f32-rminmax/gen/f32-rminmax-scalar-u3-acc3.c
   src/f32-rminmax/gen/f32-rminmax-scalar-u4-acc2.c
+  src/f32-rprecision/gen/f32-rprecision-scalar.c
   src/f32-rsum/gen/f32-rsum-scalar-u1.c
   src/f32-rsum/gen/f32-rsum-scalar-u2-acc2.c
   src/f32-rsum/gen/f32-rsum-scalar-u3-acc3.c

@@ -1674,6 +1674,14 @@ typedef void (*xnn_f16_f32acc_rsum_ukernel_fn)(
     float* output,
     const struct xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_f32_rprecision_ukernel_fn)(
+    size_t batch,
+    const float* input,
+    const int exponent_bits,
+    const int mantissa_bits,
+    float* output,
+    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_f32_rsum_ukernel_fn)(
     size_t batch,
     const float* input,

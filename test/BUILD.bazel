@@ -405,6 +405,17 @@ sh_test(
     name = "%s_test" % kernel,
     srcs = [
         "%s.cc" % kernel.replace("_", "-"),
+        "rprecision-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+) for kernel in [
+    "f32_rprecision",
+]]
+
+[xnnpack_unit_test(
+    name = "%s_test" % kernel,
+    srcs = [
+        "%s.cc" % kernel.replace("_", "-"),
         "rsum-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,

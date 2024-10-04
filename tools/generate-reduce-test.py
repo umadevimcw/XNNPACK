@@ -20,7 +20,7 @@ import xnncommon
 parser = argparse.ArgumentParser(
   description='Reduce microkernel test generator')
 parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
-                    choices=["ReduceMicrokernelTester", "RSumMicrokernelTester"],
+                    choices=["ReduceMicrokernelTester", "RPrecisionMicrokernelTester", "RSumMicrokernelTester"],
                     help="Tester class to be used in the generated test")
 parser.add_argument("-s", "--spec", metavar="FILE", required=True,
                     help="Specification (YAML) file")
@@ -30,13 +30,14 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(f16|f16_f32acc|f32|qs8|qu8|u8)_r(minmax|max|min|sum)(_minmax_(fp32))?_ukernel__(.+)_u(\d+)(v)?(_acc\d+)?", name)
+  match = re.fullmatch(r"xnn_(f16|f16_f32acc|f32|qs8|qu8|u8)_r(minmax|max|min|precision|sum)(_minmax_(fp32))?_ukernel__(.+)_u(\d+)(v)?(_acc\d+)?", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
     "minmax": "MinMax",
     "max": "Max",
     "min": "Min",
+    "precision": "Precision",
     "sum": "Sum",
   }[match.group(2)]
   requantization_type = match.group(4)
@@ -136,6 +137,54 @@ $if TESTER == "RSumMicrokernelTester":
       .batch_size(${128 * BATCH_TILE})
       .Test(${", ".join(TEST_ARGS)});
   }
+
+$if TESTER == "RPrecisionMicrokernelTester":
+  TEST(${TEST_NAME}, exponent_gt_1) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (int exponent_bits = 2; exponent_bits < 8; exponent_bits++) {
+      ${TESTER}()
+        .exponent_bits(exponent_bits)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+
+  TEST(${TEST_NAME}, mantissa_gt_1) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (int mantissa_bits = 1; mantissa_bits < 23; mantissa_bits++) {
+      ${TESTER}()
+        .mantissa_bits(mantissa_bits)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+
+  TEST(${TEST_NAME}, exponent_and_mantissa_gt_1) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (int exponent_bits = 2; exponent_bits < 8; exponent_bits++) {
+      for (int mantissa_bits = 1; mantissa_bits < 23; mantissa_bits++) {
+        ${TESTER}()
+          .exponent_bits(exponent_bits)
+          .mantissa_bits(mantissa_bits)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+  TEST(${TEST_NAME}, batch_4_exponent_and_mantissa_gt_1) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (int exponent_bits = 2; exponent_bits < 8; exponent_bits++) {
+      for (int mantissa_bits = 1; mantissa_bits < 23; mantissa_bits++) {
+        ${TESTER}()
+          .batch_size(4)
+          .exponent_bits(exponent_bits)
+          .mantissa_bits(exponent_bits)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
 """
 
 
@@ -199,6 +248,7 @@ def main(args):
     spec_name = os.path.splitext(os.path.split(options.spec)[1])[0]
     tester_header = {
       "ReduceMicrokernelTester": "reduce-microkernel-tester.h",
+      "RPrecisionMicrokernelTester": "rprecision-microkernel-tester.h",
       "RSumMicrokernelTester": "rsum-microkernel-tester.h",
     }[options.tester]
     tests = """\

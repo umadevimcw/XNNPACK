@@ -197,6 +197,8 @@ tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-r
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-rmin.yaml --output test/f32-rmin.cc &
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-rminmax.yaml --output test/f32-rminmax.cc &
 
+tools/generate-reduce-test.py --tester RPrecisionMicrokernelTester --spec test/f32-rprecision.yaml --output test/f32-rprecision.cc &
+
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/qs8-rsum.yaml --output test/qs8-rsum.cc &
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/qu8-rsum.yaml --output test/qu8-rsum.cc &
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/f32-rsum.yaml --output test/f32-rsum.cc &
