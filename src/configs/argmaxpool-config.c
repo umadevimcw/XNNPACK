@@ -44,11 +44,11 @@ static void init_f32_argmaxpool_config(void) {
         .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9x__scalar_c1,
         .first_pass_tile_size = 9,
       };
-      f32_argmaxpool_config[2] = (struct xnn_argmaxpool_config) {
+      /*f32_argmaxpool_config[2] = (struct xnn_argmaxpool_config) {
         .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1,
         .first_pass_tile_size = 9,
         .remainder_pass_tile_size = 8,
-      };
+      };*/
     }
   #elif XNN_ARCH_ARM64
     f32_argmaxpool_config[0] = (struct xnn_argmaxpool_config) {
@@ -59,11 +59,11 @@ static void init_f32_argmaxpool_config(void) {
       .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9x__neon_c4,
       .first_pass_tile_size = 9,
     };
-    f32_argmaxpool_config[2] = (struct xnn_argmaxpool_config) {
+    /*f32_argmaxpool_config[2] = (struct xnn_argmaxpool_config) {
       .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__neon_c4,
       .first_pass_tile_size = 9,
       .remainder_pass_tile_size = 8,
-    };
+    };*/
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     f32_argmaxpool_config[0] = (struct xnn_argmaxpool_config) {
       .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__sse2_c4,
@@ -73,11 +73,11 @@ static void init_f32_argmaxpool_config(void) {
       .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9x__sse2_c4,
       .first_pass_tile_size = 9,
     };
-    f32_argmaxpool_config[2] = (struct xnn_argmaxpool_config) {
+    /*f32_argmaxpool_config[2] = (struct xnn_argmaxpool_config) {
       .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__sse2_c4,
       .first_pass_tile_size = 9,
       .remainder_pass_tile_size = 8,
-    };
+    };*/
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_argmaxpool_config[0] = (struct xnn_argmaxpool_config) {
       .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__wasmsimd_c4,
@@ -87,11 +87,11 @@ static void init_f32_argmaxpool_config(void) {
       .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9x__wasmsimd_c4,
       .first_pass_tile_size = 9,
     };
-    f32_argmaxpool_config[2] = (struct xnn_argmaxpool_config) {
+    /*f32_argmaxpool_config[2] = (struct xnn_argmaxpool_config) {
       .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__wasmsimd_c4,
       .first_pass_tile_size = 9,
       .remainder_pass_tile_size = 8,
-    };
+    };*/
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     f32_argmaxpool_config[0] = (struct xnn_argmaxpool_config) {
       .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__rvv_u1v,
@@ -101,11 +101,11 @@ static void init_f32_argmaxpool_config(void) {
       .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9x__rvv_u1v,
       .first_pass_tile_size = 9,
     };
-    f32_argmaxpool_config[2] = (struct xnn_argmaxpool_config) {
+    /*f32_argmaxpool_config[2] = (struct xnn_argmaxpool_config) {
       .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v,
       .first_pass_tile_size = 9,
       .remainder_pass_tile_size = 8,
-    };
+    };*/
   #else
     f32_argmaxpool_config[0] = (struct xnn_argmaxpool_config) {
       .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__scalar_c1,
@@ -115,11 +115,11 @@ static void init_f32_argmaxpool_config(void) {
       .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9x__scalar_c1,
       .first_pass_tile_size = 9,
     };
-    f32_argmaxpool_config[2] = (struct xnn_argmaxpool_config) {
+    /*f32_argmaxpool_config[2] = (struct xnn_argmaxpool_config) {
       .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1,
       .first_pass_tile_size = 9,
       .remainder_pass_tile_size = 8,
-    };
+    };*/
   #endif
 }
 
